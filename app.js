@@ -1,17 +1,39 @@
+require("dotenv").config();
 const createError = require("http-errors");
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
+const session = require("express-session");
+const LocalStrategy = require("passport-local").Strategy;
+const bcrypt = require("bcrypt");
+const passport = require("passport");
+const mongoose = require("mongoose");
 
 const indexRouter = require("./routes/index");
 const usersRouter = require("./routes/users");
 
 const app = express();
 
+const mongoDB = process.env.mongoURL;
+mongoose.connect(mongoDB);
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "mongo connection error"));
+
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
+
+app.use(
+  session({
+    secret: process.env.secret,
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
+
+app.use(passport.session());
+app.use(express.urlencoded({ extended: false }));
 
 app.use(logger("dev"));
 app.use(express.json());

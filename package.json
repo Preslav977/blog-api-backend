@@ -8,7 +8,7 @@
   "scripts": {
     "start": "node ./bin/www",
     "devstart": "nodemon ./bin/www",
-    "serverstart": "DEBUG=express:* npm run devstart"
+    "serverstart": "DEBUG=express: blog-api-backend* npm run devstart"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
