@@ -197,4 +197,20 @@ router.put(
   }),
 );
 
+router.delete(
+  "/post/:id",
+  asyncHandler(async (req, res) => {
+    const post = await Promise.all([
+      Post.findById(req.params.id).populate("category").exec(),
+    ]);
+
+    if (post === null) {
+      res.redirect("/");
+    } else {
+      await Post.findByIdAndDelete(req.params.id);
+      res.json(post);
+    }
+  }),
+);
+
 module.exports = router;
