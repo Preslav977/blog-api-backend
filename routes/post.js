@@ -23,11 +23,11 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 300 })
     .escape(),
-  //   body("category", "Category must be between 5 and 30 characters long.")
-  //     .trim()
-  //     .isLength({ min: 5 })
-  //     .isLength({ max: 30 })
-  //     .escape(),
+  body("category", "Category must be between 5 and 30 characters long.")
+    .trim()
+    .isLength({ min: 5 })
+    .isLength({ max: 30 })
+    .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
@@ -66,23 +66,64 @@ router.post(
     if (!errors.isEmpty()) {
       console.log(errors);
     } else {
-      await post.save();
-      res.json(post);
+      const postTitleExists = await Post.findOne({ title: req.body.title })
+        .collation({ locale: "en", strength: 2 })
+        .exec();
+
+      if (postTitleExists) {
+        res.redirect("/");
+      } else {
+        await post.save();
+        res.json(post);
+      }
     }
   }),
 );
 
-// router.get("/post/:name", (req, res) => {
-//   res.send(`GET HTTP post name request ${req.params.name}`);
-// });
+router.get(
+  "/post/:title",
+  asyncHandler(async (req, res, next) => {
+    const post = await Promise.all([
+      Post.findOne({ title: req.params.title })
+        .populate("category")
+        // .populate("comments")
+        .exec(),
+    ]);
+
+    console.log({ title: req.params.title });
+    console.log(req.params.title);
+
+    if (post === null) {
+      const err = new Error("Post not found.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
 
 // router.get("/category/:name", (req, res) => {
 //   res.send(`GET HTTP post category name request ${req.params.name}`);
 // });
 
-// router.get("/tag/:name", (req, res) => {
-//   res.send(`GET HTTP post tag name request ${req.params.name}`);
-// });
+router.get(
+  "/tag/:name",
+  asyncHandler(async (req, res, next) => {
+    const post = await Promise.all([
+      Post.findOne({ tags: req.params.name })
+        .populate("category")
+        // .populate("comments")
+        .exec(),
+    ]);
+
+    if (post === null) {
+      const err = new Error("No posts have been found based on that tag.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
 
 // router.get("/latest:/id", (req, res) => {
 //   res.send(`GET HTTP post latest post page number request ${req.params.id}`);
