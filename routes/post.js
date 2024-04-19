@@ -23,11 +23,11 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 300 })
     .escape(),
-  body("category", "Category must be between 5 and 30 characters long.")
-    .trim()
-    .isLength({ min: 5 })
-    .isLength({ max: 30 })
-    .escape(),
+  //   body("category", "Category must be between 5 and 30 characters long.")
+  //     .trim()
+  //     .isLength({ min: 5 })
+  //     .isLength({ max: 30 })
+  //     .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
@@ -77,6 +77,18 @@ router.post(
         res.json(post);
       }
     }
+  }),
+);
+
+router.get(
+  "/",
+  asyncHandler(async (req, res) => {
+    const allPosts = await Post.find()
+      .sort({ title: 1 })
+      .populate("category")
+      .exec();
+
+    res.json(allPosts);
   }),
 );
 
