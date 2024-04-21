@@ -4,6 +4,8 @@ const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const Post = require("../models/post");
+const Categories = require("../models/categories");
+const Comment = require("../models/comments");
 
 router.post(
   "/create",
@@ -23,11 +25,6 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 300 })
     .escape(),
-  //   body("category", "Category must be between 5 and 30 characters long.")
-  //     .trim()
-  //     .isLength({ min: 5 })
-  //     .isLength({ max: 30 })
-  //     .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
@@ -52,13 +49,13 @@ router.post(
       author: req.body.author,
       date: new Date(),
       body: req.body.body,
-      category: req.body.category,
+      categories: [],
       tags: req.body.tags,
       image_link: req.body.image_link,
       image_owner: req.body.image_owner,
       image_source: req.body.image_source,
       privacy: req.body.privacy,
-      comments: req.body.comments,
+      comments: [],
     });
 
     console.log(post);
@@ -83,10 +80,7 @@ router.post(
 router.get(
   "/",
   asyncHandler(async (req, res) => {
-    const allPosts = await Post.find()
-      .sort({ title: 1 })
-      .populate("category")
-      .exec();
+    const allPosts = await Post.find().sort({ title: 1 }).exec();
 
     res.json(allPosts);
   }),
@@ -94,16 +88,12 @@ router.get(
 
 router.get(
   "/post/:title",
-  asyncHandler(async (req, res, next) => {
-    const post = await Promise.all([
-      Post.findOne({ title: req.params.title })
-        .populate("category")
-        // .populate("comments")
-        .exec(),
-    ]);
 
-    console.log({ title: req.params.title });
-    console.log(req.params.title);
+  asyncHandler(async (req, res, next) => {
+    const post = await Post.findOne({ title: req.params.title })
+      .populate("categories")
+      .populate("comments")
+      .exec();
 
     if (post === null) {
       const err = new Error("Post not found.");
@@ -111,6 +101,49 @@ router.get(
       return next(err);
     }
     res.json(post);
+  }),
+);
+
+router.post(
+  "/post/:title",
+
+  body("category", "Category must be between 3 and 30 characters long.")
+    .trim()
+    .isLength({ min: 3 })
+    .isLength({ max: 30 })
+    .escape(),
+
+  body("content", "Content must be between 5 and 100 characters long.")
+    .trim()
+    .isLength({ min: 5 })
+    .isLength({ max: 100 })
+    .escape(),
+
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    const post = await Post.findOne({ title: req.params.title }).exec();
+
+    const comment = new Comment({
+      content: req.body.content,
+      date: new Date(),
+      like: 0,
+    });
+
+    const category = new Categories({
+      category: req.body.category,
+    });
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      post.comments.push(comment);
+      post.categories.push(category);
+      await comment.save();
+      await category.save();
+      await post.save();
+      res.json(post);
+    }
   }),
 );
 

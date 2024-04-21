@@ -7,17 +7,13 @@ const PostModel = new Schema({
   author: { type: String, minLength: 5, maxLength: 80, required: true },
   date: { type: Date },
   body: { type: String, minLength: 5, maxLength: 300, required: true },
-  category: { type: Schema.Types.ObjectId, ref: "Category" },
+  categories: [{ type: Schema.Types.ObjectId, ref: "Categories" }],
   tags: [{ type: String, minLength: 5, maxLength: 30, required: true }],
   image_link: { type: String, required: true },
   image_owner: { type: String, minLength: 5, maxLength: 30, required: true },
   image_source: { type: String, minLength: 5, maxLength: 30, required: true },
   privacy: { type: Boolean, required: true },
   comments: [{ type: Schema.Types.ObjectId, ref: "Comments" }],
-});
-
-PostModel.virtual("url").get(function () {
-  return `/post/${this.title}`;
 });
 
 module.exports = mongoose.model("Post", PostModel);

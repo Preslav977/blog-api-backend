@@ -12,7 +12,7 @@ const mongoose = require("mongoose");
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
-const categoryRouter = require("./routes/category");
+const categoryRouter = require("./routes/categories");
 
 const app = express();
 
