@@ -292,7 +292,7 @@ router.put(
 );
 
 router.put(
-  "/posts/:id/comments",
+  "/posts/:id/comment/:commentId",
 
   body("content", "Content must be between 5 and 100 characters long.")
     .trim()
@@ -303,7 +303,7 @@ router.put(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findById(req.params.id).exec();
+    const post = await Post.find(req.params.id).exec();
 
     const comment = new Comment({
       content: req.body.content,
@@ -318,7 +318,7 @@ router.put(
       console.log(errors.array());
     } else {
       const updateComment = await Post.findByIdAndUpdate(
-        req.params.id,
+        req.params.commentId,
         comment,
       );
       res.json(updateComment);
@@ -350,21 +350,21 @@ router.delete(
 
   asyncHandler(async (req, res, next) => {
     const post = await Promise.all([
-      Post.findOne({ comments: req.params.id })
+      Post.findById(req.params.id)
         .populate("category")
         .populate("comments")
         .exec(),
-      // Comment.findById(req.params.id).exec(),
+      Comment.findById(req.params.commentId),
     ]);
 
-    console.log(post.comments);
+    console.log(req.params.id);
 
     if (post === null) {
       const err = new Error("Post not found.");
       err.status = 404;
       return next(err);
     }
-    await Comment.findByIdAndDelete(req.params.id, post);
+    await Comment.findOneAndDelete(req.params.commentId);
     res.json(post);
   }),
 );
