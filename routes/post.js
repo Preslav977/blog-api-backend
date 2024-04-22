@@ -4,8 +4,81 @@ const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const Post = require("../models/post");
-const Categories = require("../models/categories");
+const Category = require("../models/category");
 const Comment = require("../models/comments");
+
+router.get(
+  "/posts",
+  asyncHandler(async (req, res) => {
+    const allPosts = await Post.find()
+      .sort({ title: 1 })
+      .populate("category")
+      .populate("comments")
+      .exec();
+
+    res.json(allPosts);
+  }),
+);
+
+router.get(
+  "/posts/:id",
+
+  asyncHandler(async (req, res, next) => {
+    const post = await Post.findById(req.params.id)
+      .populate("category")
+      .populate("comments")
+      .exec();
+
+    if (post === null) {
+      const err = new Error("Post not found.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
+
+router.get(
+  "/posts/:id/category",
+
+  asyncHandler(async (req, res, next) => {
+    const post = await Post.find({ category: req.params.id })
+      .populate("category")
+      .populate("comments")
+      .exec();
+
+    console.log(post);
+    if (post === null) {
+      const err = new Error("Post not found.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
+
+router.get(
+  "/posts/:name/tag/",
+  asyncHandler(async (req, res, next) => {
+    const post = await Promise.all([
+      Post.findOne({ tags: req.params.name })
+        .populate("category")
+        .populate("comments")
+        .exec(),
+    ]);
+
+    if (post === null) {
+      const err = new Error("No posts have been found based on that tag.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
+
+router.get("/posts/latest/:id", (req, res) => {
+  // TODO: When you figure out how to make 10 posts on each page.
+});
 
 router.post(
   "/posts",
@@ -49,7 +122,7 @@ router.post(
       author: req.body.author,
       date: new Date(),
       body: req.body.body,
-      categories: [],
+      category: [],
       tags: req.body.tags,
       image_link: req.body.image_link,
       image_owner: req.body.image_owner,
@@ -77,41 +150,41 @@ router.post(
   }),
 );
 
-router.get(
-  "/posts",
-  asyncHandler(async (req, res) => {
-    const allPosts = await Post.find().sort({ title: 1 }).exec();
-
-    res.json(allPosts);
-  }),
-);
-
-router.get(
-  "/posts/:title",
-
-  asyncHandler(async (req, res, next) => {
-    const post = await Post.findOne({ title: req.params.title })
-      .populate("categories")
-      .populate("comments")
-      .exec();
-
-    if (post === null) {
-      const err = new Error("Post not found.");
-      err.status = 404;
-      return next(err);
-    }
-    res.json(post);
-  }),
-);
-
 router.post(
-  "/posts/:title",
+  "/posts/:id/category",
 
   body("category", "Category must be between 3 and 30 characters long.")
     .trim()
     .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
+
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    const post = await Post.findById(req.params.id).exec();
+
+    const category = new Category({
+      category: req.body.category,
+    });
+
+    console.log(category);
+
+    console.log(post);
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      post.category.push(category);
+      await category.save();
+      await post.save();
+      res.json(post);
+    }
+  }),
+);
+
+router.post(
+  "/posts/:id/comments",
 
   body("content", "Content must be between 5 and 100 characters long.")
     .trim()
@@ -122,7 +195,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findOne({ title: req.params.title }).exec();
+    const post = await Post.findById(req.params.id).exec();
 
     const comment = new Comment({
       content: req.body.content,
@@ -130,64 +203,18 @@ router.post(
       like: 0,
     });
 
-    const category = new Categories({
-      category: req.body.category,
-    });
+    console.log(post);
 
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
       post.comments.push(comment);
-      post.categories.push(category);
       await comment.save();
-      await category.save();
       await post.save();
       res.json(post);
     }
   }),
 );
-
-router.get(
-  "/posts/category/:name",
-
-  asyncHandler(async (req, res, next) => {
-    const post = await Post.find({ category: req.params.name })
-      .populate("categories")
-      .populate("comments")
-      .exec();
-
-    console.log(post);
-    if (post === null) {
-      const err = new Error("Post not found.");
-      err.status = 404;
-      return next(err);
-    }
-    res.json(post);
-  }),
-);
-
-router.get(
-  "/posts/tag/:name",
-  asyncHandler(async (req, res, next) => {
-    const post = await Promise.all([
-      Post.findOne({ tags: req.params.name })
-        .populate("category")
-        // .populate("comments")
-        .exec(),
-    ]);
-
-    if (post === null) {
-      const err = new Error("No posts have been found based on that tag.");
-      err.status = 404;
-      return next(err);
-    }
-    res.json(post);
-  }),
-);
-
-router.get("/posts/latest:/id", (req, res) => {
-  // TODO: When you figure out how to make 10 posts on each page.
-});
 
 router.put(
   "/posts/:id",
@@ -206,6 +233,11 @@ router.put(
     .trim()
     .isLength({ min: 5 })
     .isLength({ max: 300 })
+    .escape(),
+  body("category", "Category must be between 3 and 30 characters long.")
+    .trim()
+    .isLength({ min: 3 })
+    .isLength({ max: 30 })
     .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
@@ -231,14 +263,18 @@ router.put(
       author: req.body.author,
       date: new Date(),
       body: req.body.body,
-      category: req.body.category,
+      category: [],
       tags: req.body.tags,
       image_link: req.body.image_link,
       image_owner: req.body.image_owner,
       image_source: req.body.image_source,
       privacy: req.body.privacy,
-      comments: req.body.comments,
+      comments: [],
       _id: req.params.id,
+    });
+
+    const category = new Category({
+      category: req.body.category,
     });
 
     console.log(post);
@@ -246,8 +282,46 @@ router.put(
     if (!errors.isEmpty()) {
       console.log(errors);
     } else {
+      post.category.push(category);
+      // await category.save();
+      // await post.save();
       const updatePost = await Post.findByIdAndUpdate(req.params.id, post);
       res.json(updatePost);
+    }
+  }),
+);
+
+router.put(
+  "/posts/:id/comments",
+
+  body("content", "Content must be between 5 and 100 characters long.")
+    .trim()
+    .isLength({ min: 5 })
+    .isLength({ max: 100 })
+    .escape(),
+
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    const post = await Post.findById(req.params.id).exec();
+
+    const comment = new Comment({
+      content: req.body.content,
+      date: new Date(),
+      like: 0,
+      _id: req.params.id,
+    });
+
+    console.log(post);
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      const updateComment = await Post.findByIdAndUpdate(
+        req.params.id,
+        comment,
+      );
+      res.json(updateComment);
     }
   }),
 );
@@ -256,7 +330,10 @@ router.delete(
   "/posts/:id",
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
-      Post.findById(req.params.id).populate("category").exec(),
+      Post.findById(req.params.id)
+        .populate("category")
+        .populate("comments")
+        .exec(),
     ]);
 
     if (post === null) {
@@ -265,6 +342,30 @@ router.delete(
       await Post.findByIdAndDelete(req.params.id);
       res.json(post);
     }
+  }),
+);
+
+router.delete(
+  "/posts/:id/comment/:commentId",
+
+  asyncHandler(async (req, res, next) => {
+    const post = await Promise.all([
+      Post.findOne({ comments: req.params.id })
+        .populate("category")
+        .populate("comments")
+        .exec(),
+      // Comment.findById(req.params.id).exec(),
+    ]);
+
+    console.log(post.comments);
+
+    if (post === null) {
+      const err = new Error("Post not found.");
+      err.status = 404;
+      return next(err);
+    }
+    await Comment.findByIdAndDelete(req.params.id, post);
+    res.json(post);
   }),
 );
 

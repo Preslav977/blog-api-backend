@@ -4,7 +4,7 @@ const router = express.Router();
 
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
-const Category = require("../models/categories");
+const Category = require("../models/category");
 
 router.post(
   "/create",
