@@ -7,11 +7,10 @@ const UserSchema = new Schema({
   username: { type: String, minLength: 5, maxLength: 30, required: true },
   first_name: { type: String, minLength: 5, maxLength: 30, required: true },
   last_name: { type: String, minLength: 5, maxLength: 30, required: true },
-  password: { type: String, minLength: 8, maxLength: 30, required: true },
+  password: { type: String, minLength: 8, required: true },
   confirm_password: {
     type: String,
     minLength: 8,
-    maxLength: 30,
     required: true,
   },
 });

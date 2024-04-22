@@ -43,7 +43,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", postsRouter);
-app.use("/account", usersRouter);
+app.use("/user", usersRouter);
 app.use("/category", categoryRouter);
 
 // catch 404 and forward to error handler

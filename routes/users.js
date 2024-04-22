@@ -4,9 +4,10 @@ const router = express.Router();
 
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
+const bcrypt = require("bcrypt");
 const User = require("../models/user");
 
-router.post("/account/login", (req, res) => {
+router.post("/login", (req, res) => {
   res.send("POST HTTP account login request");
 });
 
@@ -34,38 +35,44 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("password", "Password must be between 8 and 30 characters long.")
-    .isLength({ min: 8 })
-    .isLength({ max: 30 }),
+  body("password", "Password must be between 8 characters long.").isLength({
+    min: 8,
+  }),
   body("confirm_password", "Passwords don't match").custom(
     (value, { req }) => value === req.body.password,
   ),
 
   asyncHandler(async (req, res) => {
-    const errors = validationResult(req);
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      if (err) {
+        console.log(err);
+      }
 
-    const user = new User({
-      email: req.body.email,
-      username: req.body.username,
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      password: req.body.password,
-      confirm_password: req.body.confirm_password,
+      const errors = validationResult(req);
+
+      const user = new User({
+        email: req.body.email,
+        username: req.body.username,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        password: hashedPassword,
+        confirm_password: hashedPassword,
+      });
+
+      console.log(user);
+
+      if (!errors.isEmpty()) {
+        console.log(errors);
+      } else {
+        await user.save();
+        res.json(user);
+      }
     });
-
-    console.log(user);
-
-    if (!errors.isEmpty()) {
-      console.log(errors);
-    } else {
-      await user.save();
-      res.json(user);
-    }
   }),
 );
 
-router.post(
-  "/account",
+router.put(
+  "/:id",
 
   body("email", "Email must be between 5 and 30 characters")
     .trim()
@@ -88,34 +95,40 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("password", "Password must be between 8 and 30 characters long.")
-    .isLength({ min: 8 })
-    .isLength({ max: 30 }),
+  body("password", "Password must be between 8 characters long.").isLength({
+    min: 8,
+  }),
   body("confirm_password", "Passwords don't match").custom(
     (value, { req }) => value === req.body.password,
   ),
 
   asyncHandler(async (req, res) => {
-    const errors = validationResult(req);
+    bcrypt.hash(req.body.password, 10, async (err, hashedPassword) => {
+      if (err) {
+        console.log(err);
+      }
 
-    const user = new User({
-      email: req.body.email,
-      username: req.body.username,
-      first_name: req.body.first_name,
-      last_name: req.body.last_name,
-      password: req.body.password,
-      confirm_password: req.body.confirm_password,
-      _id: req.params.id,
+      const errors = validationResult(req);
+
+      const user = new User({
+        email: req.body.email,
+        username: req.body.username,
+        first_name: req.body.first_name,
+        last_name: req.body.last_name,
+        password: hashedPassword,
+        confirm_password: hashedPassword,
+        _id: req.params.id,
+      });
+
+      console.log(user);
+
+      if (!errors.isEmpty()) {
+        console.log(errors);
+      } else {
+        const updateUser = await User.findByIdAndUpdate(req.params.id, user);
+        res.json(updateUser);
+      }
     });
-
-    console.log(user);
-
-    if (!errors.isEmpty()) {
-      console.log(errors);
-    } else {
-      const updateUser = await User.findByIdAndUpdate(req.body.id, user);
-      res.json(updateUser);
-    }
   }),
 );
 
