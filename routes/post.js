@@ -8,7 +8,7 @@ const Categories = require("../models/categories");
 const Comment = require("../models/comments");
 
 router.post(
-  "/create",
+  "/posts",
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -78,7 +78,7 @@ router.post(
 );
 
 router.get(
-  "/",
+  "/posts",
   asyncHandler(async (req, res) => {
     const allPosts = await Post.find().sort({ title: 1 }).exec();
 
@@ -87,7 +87,7 @@ router.get(
 );
 
 router.get(
-  "/post/:title",
+  "/posts/:title",
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.findOne({ title: req.params.title })
@@ -105,7 +105,7 @@ router.get(
 );
 
 router.post(
-  "/post/:title",
+  "/posts/:title",
 
   body("category", "Category must be between 3 and 30 characters long.")
     .trim()
@@ -147,12 +147,27 @@ router.post(
   }),
 );
 
-router.get("/category/:name", (req, res) => {
-  // TODO: When the categories are created.
-});
+router.get(
+  "/posts/category/:name",
+
+  asyncHandler(async (req, res, next) => {
+    const post = await Post.find({ category: req.params.name })
+      .populate("categories")
+      .populate("comments")
+      .exec();
+
+    console.log(post);
+    if (post === null) {
+      const err = new Error("Post not found.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(post);
+  }),
+);
 
 router.get(
-  "/tag/:name",
+  "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
     const post = await Promise.all([
       Post.findOne({ tags: req.params.name })
@@ -170,12 +185,12 @@ router.get(
   }),
 );
 
-router.get("/latest:/id", (req, res) => {
+router.get("/posts/latest:/id", (req, res) => {
   // TODO: When you figure out how to make 10 posts on each page.
 });
 
 router.put(
-  "/post/:id",
+  "/posts/:id",
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -192,11 +207,6 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 300 })
     .escape(),
-  //   body("category", "Category must be between 5 and 30 characters long.")
-  //     .trim()
-  //     .isLength({ min: 5 })
-  //     .isLength({ max: 30 })
-  //     .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
@@ -243,7 +253,7 @@ router.put(
 );
 
 router.delete(
-  "/post/:id",
+  "/posts/:id",
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id).populate("category").exec(),
