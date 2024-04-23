@@ -201,6 +201,7 @@ router.post(
       content: req.body.content,
       date: new Date(),
       like: 0,
+      hidden: false,
     });
 
     console.log(post);
@@ -283,8 +284,6 @@ router.put(
       console.log(errors);
     } else {
       post.category.push(category);
-      // await category.save();
-      // await post.save();
       const updatePost = await Post.findByIdAndUpdate(req.params.id, post);
       res.json(updatePost);
     }
@@ -349,23 +348,11 @@ router.delete(
   "/posts/:id/comment/:commentId",
 
   asyncHandler(async (req, res, next) => {
-    const post = await Promise.all([
-      Post.findById(req.params.id)
-        .populate("category")
-        .populate("comments")
-        .exec(),
-      Comment.findById(req.params.commentId),
-    ]);
+    const { commentId } = req.params;
 
-    console.log(req.params.id);
+    await Comment.findOneAndUpdate({ _id: commentId, hidden: true });
 
-    if (post === null) {
-      const err = new Error("Post not found.");
-      err.status = 404;
-      return next(err);
-    }
-    await Comment.findOneAndDelete(req.params.commentId);
-    res.json(post);
+    res.json("Comment has been deleted");
   }),
 );
 
