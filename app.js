@@ -13,6 +13,7 @@ const mongoose = require("mongoose");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
+const User = require("./models/user");
 
 const app = express();
 
@@ -35,6 +36,65 @@ app.use(
 
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
+
+app.use((req, res, next) => {
+  req.local.loggedUser = req.loggedUser;
+  next();
+});
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email });
+        if (!user) {
+          return done(null, false, { message: "Incorrect email" });
+        }
+        const match = await bcrypt.compare(password, user.password);
+        if (!match) {
+          return done(null, false, { message: "Incorrect password" });
+        }
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
+    },
+  ),
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    done(null, user);
+  } catch (err) {
+    done(err);
+  }
+});
+
+app.post(
+  "/",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/",
+  }),
+);
+
+app.get("/log-out", (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
 
 app.use(logger("dev"));
 app.use(express.json());

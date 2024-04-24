@@ -35,7 +35,7 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("password", "Password must be between 8 characters long.").isLength({
+  body("password", "Password must be at least 8 characters long.").isLength({
     min: 8,
   }),
   body("confirm_password", "Passwords don't match").custom(
@@ -95,7 +95,7 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("password", "Password must be between 8 characters long.").isLength({
+  body("password", "Password must be at least 8 characters long.").isLength({
     min: 8,
   }),
   body("confirm_password", "Passwords don't match").custom(

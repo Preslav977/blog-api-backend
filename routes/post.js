@@ -209,10 +209,20 @@ router.post(
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      post.comments.push(comment);
-      await comment.save();
-      await post.save();
-      res.json(post);
+      const commentOnPost = await Post.findOne({
+        comments: { $in: { _id: req.params.id } },
+      })
+        .collation({ locale: "en", strength: 2 })
+        .exec();
+
+      if (commentOnPost) {
+        res.redirect("/");
+      } else {
+        post.comments.push(comment);
+        await comment.save();
+        await post.save();
+        res.json(post);
+      }
     }
   }),
 );
