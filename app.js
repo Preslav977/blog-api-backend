@@ -38,7 +38,7 @@ app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
-  req.local.loggedUser = req.loggedUser;
+  res.locals.loggedUser = req.loggedUser;
   next();
 });
 
@@ -80,7 +80,7 @@ passport.deserializeUser(async (id, done) => {
 });
 
 app.post(
-  "/user/login",
+  "/login",
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/",

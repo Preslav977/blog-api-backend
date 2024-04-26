@@ -6,23 +6,36 @@ const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const passport = require("passport");
+
+const localStorage = require("localStorage");
 const User = require("../models/user");
 
-router.post("/login", (req, res) => {
-  const { loggedUser } = req;
+router.post(
+  "/login",
+  passport.authenticate("local", { session: false }),
+  (req, res) => {
+    const { loggedUser } = req;
 
-  jwt.sign(
-    { loggedUser },
-    process.env.SECRET,
-    { expiresIn: "1m" },
-    (err, token) => {
-      localStorage.setItem("token", token);
-      res.json({
-        message: "Token has been issued",
-      });
-    },
-  );
-});
+    console.log(loggedUser);
+
+    jwt.sign(
+      { loggedUser },
+      process.env.SECRET,
+      { expiresIn: "1m" },
+      (err, token) => {
+        const bearerArrayToken = ["Bearer", token];
+
+        localStorage.setItem("token", JSON.stringify(bearerArrayToken));
+
+        res.json({
+          message: "Token has been issued",
+          token,
+        });
+      },
+    );
+  },
+);
 
 router.post(
   "/signup",
@@ -87,13 +100,6 @@ router.post(
 router.put(
   "/:id",
   verifyToken,
-  (req, res) => {
-    jwt.verify(req.token, process.env.SECRET, (err, authData) => {
-      if (err) {
-        res.sendStatus(403);
-      }
-    });
-  },
 
   body("email", "Email must be between 5 and 30 characters")
     .trim()
@@ -154,7 +160,11 @@ router.put(
 );
 
 function verifyToken(req, res, next) {
-  const bearerHeader = req.headers.authorization;
+  const retrieveFromLocalStorage = JSON.parse(localStorage.getItem("token"));
+
+  const retrieveToken = retrieveFromLocalStorage.join(" ");
+
+  const bearerHeader = retrieveToken;
 
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeader.split(" ");
@@ -162,6 +172,14 @@ function verifyToken(req, res, next) {
     const bearerToken = bearer[1];
 
     req.token = bearerToken;
+
+    jwt.verify(req.token, process.env.SECRET, (err, authData) => {
+      if (err) {
+        res.sendStatus(403);
+      } else {
+        res.json(authData);
+      }
+    });
 
     next();
   } else {
