@@ -80,7 +80,7 @@ passport.deserializeUser(async (id, done) => {
 });
 
 app.post(
-  "/",
+  "/user/login",
   passport.authenticate("local", {
     successRedirect: "/",
     failureRedirect: "/",

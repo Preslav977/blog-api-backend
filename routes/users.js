@@ -5,10 +5,23 @@ const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
 router.post("/login", (req, res) => {
-  res.send("POST HTTP account login request");
+  const { loggedUser } = req;
+
+  jwt.sign(
+    { loggedUser },
+    process.env.SECRET,
+    { expiresIn: "1m" },
+    (err, token) => {
+      localStorage.setItem("token", token);
+      res.json({
+        message: "Token has been issued",
+      });
+    },
+  );
 });
 
 router.post(
@@ -73,6 +86,14 @@ router.post(
 
 router.put(
   "/:id",
+  verifyToken,
+  (req, res) => {
+    jwt.verify(req.token, process.env.SECRET, (err, authData) => {
+      if (err) {
+        res.sendStatus(403);
+      }
+    });
+  },
 
   body("email", "Email must be between 5 and 30 characters")
     .trim()
@@ -131,5 +152,21 @@ router.put(
     });
   }),
 );
+
+function verifyToken(req, res, next) {
+  const bearerHeader = req.headers.authorization;
+
+  if (typeof bearerHeader !== "undefined") {
+    const bearer = bearerHeader.split(" ");
+
+    const bearerToken = bearer[1];
+
+    req.token = bearerToken;
+
+    next();
+  } else {
+    res.sendStatus(403);
+  }
+}
 
 module.exports = router;
