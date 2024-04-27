@@ -7,6 +7,8 @@ const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
 
+const verifyToken = require("../middleware/verifyToken");
+
 router.get(
   "/posts",
   asyncHandler(async (req, res) => {
@@ -14,6 +16,7 @@ router.get(
       .sort({ title: 1 })
       .populate("category")
       .populate("comments")
+      .populate("users")
       .exec();
 
     res.json(allPosts);
@@ -27,6 +30,7 @@ router.get(
     const post = await Post.findById(req.params.id)
       .populate("category")
       .populate("comments")
+      .populate("users")
       .exec();
 
     if (post === null) {
@@ -45,6 +49,7 @@ router.get(
     const post = await Post.find({ category: req.params.id })
       .populate("category")
       .populate("comments")
+      .populate("users")
       .exec();
 
     console.log(post);
@@ -64,6 +69,7 @@ router.get(
       Post.findOne({ tags: req.params.name })
         .populate("category")
         .populate("comments")
+        .populate("users")
         .exec(),
     ]);
 
@@ -82,6 +88,7 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
+  verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -141,7 +148,7 @@ router.post(
         .exec();
 
       if (postTitleExists) {
-        res.redirect("/");
+        res.json({ message: "Post already exists with that title." });
       } else {
         await post.save();
         res.json(post);
@@ -152,6 +159,7 @@ router.post(
 
 router.post(
   "/posts/:id/category",
+  verifyToken,
 
   body("category", "Category must be between 3 and 30 characters long.")
     .trim()
@@ -185,6 +193,7 @@ router.post(
 
 router.post(
   "/posts/:id/comments",
+  verifyToken,
 
   body("content", "Content must be between 5 and 100 characters long.")
     .trim()
@@ -209,26 +218,17 @@ router.post(
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      const commentOnPost = await Post.findOne({
-        comments: { $in: { _id: req.params.id } },
-      })
-        .collation({ locale: "en", strength: 2 })
-        .exec();
-
-      if (commentOnPost) {
-        res.redirect("/");
-      } else {
-        post.comments.push(comment);
-        await comment.save();
-        await post.save();
-        res.json(post);
-      }
+      post.comments.push(comment);
+      await comment.save();
+      await post.save();
+      res.json(post);
     }
   }),
 );
 
 router.put(
   "/posts/:id",
+  verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -302,6 +302,7 @@ router.put(
 
 router.put(
   "/posts/:id/comment/:commentId",
+  verifyToken,
 
   body("content", "Content must be between 5 and 100 characters long.")
     .trim()
@@ -337,6 +338,7 @@ router.put(
 
 router.delete(
   "/posts/:id",
+  verifyToken,
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id)
@@ -356,6 +358,7 @@ router.delete(
 
 router.delete(
   "/posts/:id/comment/:commentId",
+  verifyToken,
 
   asyncHandler(async (req, res, next) => {
     const { commentId } = req.params;

@@ -34,7 +34,7 @@ router.post(
         .exec();
 
       if (categoryExits) {
-        res.redirect("/");
+        res.json({ message: "Category already exists with that name." });
       } else {
         await category.save();
         res.json(category);

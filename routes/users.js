@@ -8,8 +8,9 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const passport = require("passport");
 
-const localStorage = require("localStorage");
 const User = require("../models/user");
+
+const verifyToken = require("../middleware/verifyToken");
 
 router.post(
   "/login",
@@ -22,17 +23,15 @@ router.post(
     jwt.sign(
       { loggedUser },
       process.env.SECRET,
-      { expiresIn: "1m" },
-      (err, token) => {
-        const bearerArrayToken = ["Bearer", token];
+      { expiresIn: "5m" },
+      (err, token) =>
+        // const bearerArrayToken = ["Bearer", token];
 
-        localStorage.setItem("token", JSON.stringify(bearerArrayToken));
+        // localStorage.setItem("token", token);
 
         res.json({
-          message: "Token has been issued",
           token,
-        });
-      },
+        }),
     );
   },
 );
@@ -90,8 +89,16 @@ router.post(
       if (!errors.isEmpty()) {
         console.log(errors);
       } else {
-        await user.save();
-        res.json(user);
+        const userEmailExists = await User.findOne({ email: req.body.email })
+          .collation({ local: "en", strength: 2 })
+          .exec();
+
+        if (userEmailExists) {
+          res.json({ message: "Username with that email already exists." });
+        } else {
+          await user.save();
+          res.json(user);
+        }
       }
     });
   }),
@@ -158,33 +165,5 @@ router.put(
     });
   }),
 );
-
-function verifyToken(req, res, next) {
-  const retrieveFromLocalStorage = JSON.parse(localStorage.getItem("token"));
-
-  const retrieveToken = retrieveFromLocalStorage.join(" ");
-
-  const bearerHeader = retrieveToken;
-
-  if (typeof bearerHeader !== "undefined") {
-    const bearer = bearerHeader.split(" ");
-
-    const bearerToken = bearer[1];
-
-    req.token = bearerToken;
-
-    jwt.verify(req.token, process.env.SECRET, (err, authData) => {
-      if (err) {
-        res.sendStatus(403);
-      } else {
-        res.json(authData);
-      }
-    });
-
-    next();
-  } else {
-    res.sendStatus(403);
-  }
-}
 
 module.exports = router;
