@@ -12,14 +12,11 @@ const verifyToken = require("../middleware/verifyToken");
 router.get(
   "/posts",
   asyncHandler(async (req, res, next) => {
-    const posts = await Promise.all([
-      Post.find()
-        .sort({ title: 1 })
-        .populate("category")
-        // .populate("comments")
-        .exec(),
-      Comment.find().sort({ content: 1 }).populate("user").exec(),
-    ]);
+    const posts = await Post.find()
+      .sort({ title: 1 })
+      .populate("category")
+      .populate({ path: "comments", populate: { path: "user" } })
+      .exec();
 
     res.json(posts);
   }),
