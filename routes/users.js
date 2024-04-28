@@ -23,7 +23,7 @@ router.post(
     jwt.sign(
       { loggedUser },
       process.env.SECRET,
-      { expiresIn: "1m" },
+      { expiresIn: "10m" },
       (err, token) =>
         // const bearerArrayToken = ["Bearer", token];
 

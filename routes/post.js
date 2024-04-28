@@ -28,8 +28,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
       .populate("category")
-      .populate("comments")
-      .populate("users")
+      .populate({ path: "comments", populate: { path: "user" } })
       .exec();
 
     if (post === null) {
@@ -47,8 +46,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const post = await Post.find({ category: req.params.id })
       .populate("category")
-      .populate("comments")
-      .populate("users")
+      .populate({ path: "comments", populate: { path: "user" } })
       .exec();
 
     console.log(post);
@@ -67,8 +65,7 @@ router.get(
     const post = await Promise.all([
       Post.findOne({ tags: req.params.name })
         .populate("category")
-        .populate("comments")
-        .populate("users")
+        .populate({ path: "comments", populate: { path: "user" } })
         .exec(),
     ]);
 
@@ -218,10 +215,20 @@ router.post(
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      post.comments.push(comment);
-      await comment.save();
-      await post.save();
-      res.json(post);
+      const checkIfSameCommentExists = await Comment.findOne({
+        content: req.body.content,
+      })
+        .collation({ locale: "en", strength: 2 })
+        .exec();
+
+      if (checkIfSameCommentExists) {
+        res.json({ message: "Comment with this content already exists" });
+      } else {
+        post.comments.push(comment);
+        await comment.save();
+        await post.save();
+        res.json(post);
+      }
     }
   }),
 );
@@ -301,7 +308,7 @@ router.put(
 );
 
 router.put(
-  "/posts/:id/comment/:commentId",
+  "/posts/:id/comments/:commentId",
   verifyToken,
 
   body("content", "Content must be between 5 and 100 characters long.")
@@ -313,13 +320,13 @@ router.put(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.find(req.params.id).exec();
+    const post = await Post.findById(req.params.id).exec();
 
     const comment = new Comment({
       content: req.body.content,
       date: new Date(),
       like: 0,
-      _id: req.params.id,
+      _id: req.params.commentId,
     });
 
     console.log(post);
@@ -327,11 +334,9 @@ router.put(
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      const updateComment = await Post.findByIdAndUpdate(
-        req.params.commentId,
-        comment,
-      );
-      res.json(updateComment);
+      await Post.findByIdAndUpdate(req.params.commentId, comment);
+      await Comment.findByIdAndUpdate(req.params.commentId, comment);
+      res.json(post);
     }
   }),
 );
@@ -360,12 +365,23 @@ router.delete(
   "/posts/:id/comment/:commentId",
   verifyToken,
 
-  asyncHandler(async (req, res, next) => {
-    const { commentId } = req.params;
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
 
-    await Comment.findOneAndUpdate({ _id: commentId, hidden: true });
+    const post = await Post.findById(req.params.id).exec();
 
-    res.json("Comment has been deleted");
+    const comment = new Comment({
+      hidden: true,
+      _id: req.params.commentId,
+    });
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      await Post.findByIdAndUpdate(req.params.commentId, comment);
+      await Comment.findByIdAndUpdate(req.params.commentId, comment);
+    }
+    res.json(post);
   }),
 );
 
