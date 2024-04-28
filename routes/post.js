@@ -11,15 +11,17 @@ const verifyToken = require("../middleware/verifyToken");
 
 router.get(
   "/posts",
-  asyncHandler(async (req, res) => {
-    const allPosts = await Post.find()
-      .sort({ title: 1 })
-      .populate("category")
-      .populate("comments")
-      .populate("users")
-      .exec();
+  asyncHandler(async (req, res, next) => {
+    const posts = await Promise.all([
+      Post.find()
+        .sort({ title: 1 })
+        .populate("category")
+        // .populate("comments")
+        .exec(),
+      Comment.find().sort({ content: 1 }).populate("user").exec(),
+    ]);
 
-    res.json(allPosts);
+    res.json(posts);
   }),
 );
 
@@ -210,6 +212,7 @@ router.post(
       content: req.body.content,
       date: new Date(),
       like: 0,
+      user: req.body.user,
       hidden: false,
     });
 

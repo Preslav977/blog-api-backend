@@ -19,10 +19,10 @@ function verifyToken(req, res, next) {
         res.sendStatus(403);
       } else {
         req.authData = authData;
+
+        next();
       }
     });
-
-    next();
   } else {
     res.sendStatus(403);
   }

@@ -23,7 +23,7 @@ router.post(
     jwt.sign(
       { loggedUser },
       process.env.SECRET,
-      { expiresIn: "5m" },
+      { expiresIn: "1m" },
       (err, token) =>
         // const bearerArrayToken = ["Bearer", token];
 
@@ -90,7 +90,7 @@ router.post(
         console.log(errors);
       } else {
         const userEmailExists = await User.findOne({ email: req.body.email })
-          .collation({ local: "en", strength: 2 })
+          .collation({ locale: "en", strength: 2 })
           .exec();
 
         if (userEmailExists) {
