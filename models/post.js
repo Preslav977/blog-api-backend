@@ -6,7 +6,7 @@ const PostModel = new Schema({
   title: { type: String, minLength: 5, maxLength: 80, required: true },
   author: { type: String, minLength: 5, maxLength: 80, required: true },
   date: { type: Date },
-  body: { type: String, minLength: 5, maxLength: 300, required: true },
+  body: { type: String, minLength: 5, maxLength: 50000, required: true },
   category: [{ type: Schema.Types.ObjectId, ref: "Category" }],
   tags: [{ type: String, minLength: 5, maxLength: 30, required: true }],
   image_link: { type: String, required: true },

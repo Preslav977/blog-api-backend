@@ -96,10 +96,10 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 80 })
     .escape(),
-  body("body", "Body must be between 5 and 300 characters long.")
+  body("body", "Body must be between 5 and 50000 characters long.")
     .trim()
     .isLength({ min: 5 })
-    .isLength({ max: 300 })
+    .isLength({ max: 50000 })
     .escape(),
   body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
     .trim()
@@ -247,10 +247,10 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 80 })
     .escape(),
-  body("body", "Body must be between 5 and 300 characters long.")
+  body("body", "Body must be between 5 and 50000 characters long.")
     .trim()
     .isLength({ min: 5 })
-    .isLength({ max: 300 })
+    .isLength({ max: 50000 })
     .escape(),
   body("category", "Category must be between 3 and 30 characters long.")
     .trim()
