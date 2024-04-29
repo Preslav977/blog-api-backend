@@ -13,6 +13,7 @@ const UserSchema = new Schema({
     minLength: 8,
     required: true,
   },
+  verified_status: { type: Boolean },
 });
 
 module.exports = mongoose.model("User", UserSchema);

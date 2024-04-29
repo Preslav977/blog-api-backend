@@ -82,6 +82,7 @@ router.post(
         last_name: req.body.last_name,
         password: hashedPassword,
         confirm_password: hashedPassword,
+        verified_status: false,
       });
 
       console.log(user);
