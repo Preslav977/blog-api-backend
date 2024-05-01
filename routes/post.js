@@ -1,4 +1,5 @@
 const express = require("express");
+const multer = require("multer");
 
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
@@ -6,8 +7,9 @@ const { body, validationResult } = require("express-validator");
 const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
-
 const verifyToken = require("../middleware/verifyToken");
+
+const uploadFile = multer({ dest: "./public/storage" });
 
 router.get(
   "/posts",
@@ -152,6 +154,10 @@ router.post(
     }
   }),
 );
+
+router.post("/posts", uploadFile.single("uploaded_file"), async (req, res) => {
+  res.json({ message: "Image has been uploaded" });
+});
 
 router.post(
   "/posts/:id/category",
