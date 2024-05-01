@@ -9,6 +9,7 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const mongoose = require("mongoose");
+const cloudinary = require("cloudinary").v2;
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
@@ -22,6 +23,12 @@ const mongoDB = process.env.mongoURL;
 mongoose.connect(mongoDB);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
+
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.API_key,
+  api_secret: process.end.API_secret,
+});
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

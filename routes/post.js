@@ -1,5 +1,10 @@
 const express = require("express");
+const verifyToken = require("../middleware/verifyToken");
 const multer = require("multer");
+
+const uploadFile = multer({ dest: "./public/storage" });
+const cloudinary = require("cloudinary").v2;
+const fs = require("node:fs");
 
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
@@ -7,9 +12,6 @@ const { body, validationResult } = require("express-validator");
 const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
-const verifyToken = require("../middleware/verifyToken");
-
-const uploadFile = multer({ dest: "./public/storage" });
 
 router.get(
   "/posts",
@@ -155,9 +157,27 @@ router.post(
   }),
 );
 
-router.post("/posts", uploadFile.single("uploaded_file"), async (req, res) => {
-  res.json({ message: "Image has been uploaded" });
-});
+// router.post("/posts", uploadFile.single("uploaded_file"), async (req, res) => {
+//   const byteArrayBuffer = fs.readFileSync(
+//     `./public/storage/${req.file.filename}`,
+//   );
+
+//   const uploadResult = await new Promise((resolve) => {
+//     cloudinary.uploader
+//       .upload_stream((error, uploadResult) => resolve(uploadResult))
+//       .end(byteArrayBuffer);
+//   });
+
+//   try {
+//     // post object
+//     // image_link
+//     // await save
+//   } catch (error) {
+//     console.log(error);
+//   }
+
+//   res.json({ message: "Image has been uploaded" });
+// });
 
 router.post(
   "/posts/:id/category",
