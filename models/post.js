@@ -4,7 +4,7 @@ const { Schema } = mongoose;
 
 const PostModel = new Schema({
   title: { type: String, minLength: 5, maxLength: 80, required: true },
-  author: { type: String, minLength: 5, maxLength: 80, required: true },
+  author: { type: Schema.Types.ObjectId, ref: "User", required: true },
   date: { type: Date },
   body: { type: String, minLength: 5, maxLength: 50000, required: true },
   category: [{ type: Schema.Types.ObjectId, ref: "Category" }],

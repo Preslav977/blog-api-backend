@@ -18,6 +18,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const posts = await Post.find()
       .sort({ title: 1 })
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -31,6 +32,7 @@ router.get(
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -49,6 +51,7 @@ router.get(
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.find({ category: req.params.id })
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -68,6 +71,7 @@ router.get(
   asyncHandler(async (req, res, next) => {
     const post = await Promise.all([
       Post.findOne({ tags: req.params.name })
+        .populate("author")
         .populate("category")
         .populate({ path: "comments", populate: { path: "user" } })
         .exec(),
@@ -88,6 +92,7 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
+  uploadFile.single("uploaded_file"),
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -124,6 +129,16 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
+
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
+
     const post = new Post({
       title: req.body.title,
       author: req.body.author,
@@ -156,28 +171,6 @@ router.post(
     }
   }),
 );
-
-// router.post("/posts", uploadFile.single("uploaded_file"), async (req, res) => {
-//   const byteArrayBuffer = fs.readFileSync(
-//     `./public/storage/${req.file.filename}`,
-//   );
-
-//   const uploadResult = await new Promise((resolve) => {
-//     cloudinary.uploader
-//       .upload_stream((error, uploadResult) => resolve(uploadResult))
-//       .end(byteArrayBuffer);
-//   });
-
-//   try {
-//     // post object
-//     // image_link
-//     // await save
-//   } catch (error) {
-//     console.log(error);
-//   }
-
-//   res.json({ message: "Image has been uploaded" });
-// });
 
 router.post(
   "/posts/:id/category",
@@ -261,6 +254,7 @@ router.post(
 
 router.put(
   "/posts/:id",
+  uploadFile.single("uploaded_file"),
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -301,6 +295,16 @@ router.put(
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+
+    const byteArrayBuffer = fs.readFileSync(
+      `./public/storage/${req.file.filename}`,
+    );
+
+    const uploadResult = await new Promise((resolve) => {
+      cloudinary.uploader
+        .upload_stream((error, uploadResult) => resolve(uploadResult))
+        .end(byteArrayBuffer);
+    });
 
     const post = new Post({
       title: req.body.title,
@@ -373,6 +377,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id)
+        .populate("author")
         .populate("category")
         .populate("comments")
         .exec(),

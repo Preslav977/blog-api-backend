@@ -24,12 +24,6 @@ mongoose.connect(mongoDB);
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "mongo connection error"));
 
-cloudinary.config({
-  cloud_name: process.env.cloud_name,
-  api_key: process.env.API_key,
-  api_secret: process.end.API_secret,
-});
-
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
@@ -41,6 +35,12 @@ app.use(
     saveUninitialized: true,
   }),
 );
+
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.API_key,
+  api_secret: process.env.API_secret,
+});
 
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
@@ -95,7 +95,7 @@ app.post(
   }),
 );
 
-app.get("/log-out", (req, res, next) => {
+app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {
       return next(err);
