@@ -10,6 +10,7 @@ const bcrypt = require("bcrypt");
 const passport = require("passport");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
+const cors = require("cors");
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
@@ -44,6 +45,8 @@ cloudinary.config({
 
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(cors({ origin: true, credentials: true }));
 
 app.use((req, res, next) => {
   res.locals.loggedUser = req.loggedUser;

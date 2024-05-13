@@ -70,7 +70,7 @@ router.get(
   "/posts/:name/tag/",
   asyncHandler(async (req, res, next) => {
     const post = await Promise.all([
-      Post.findOne({ tags: req.params.name })
+      Post.find({ tags: req.params.name })
         .populate("author")
         .populate("category")
         .populate({ path: "comments", populate: { path: "user" } })
@@ -296,15 +296,15 @@ router.put(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const byteArrayBuffer = fs.readFileSync(
-      `./public/storage/${req.file.filename}`,
-    );
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
 
-    const uploadResult = await new Promise((resolve) => {
-      cloudinary.uploader
-        .upload_stream((error, uploadResult) => resolve(uploadResult))
-        .end(byteArrayBuffer);
-    });
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
 
     const post = new Post({
       title: req.body.title,
