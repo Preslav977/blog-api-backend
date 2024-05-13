@@ -67,15 +67,13 @@ router.get(
 );
 
 router.get(
-  "/posts/:name/tag/",
+  "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
-    const post = await Promise.all([
-      Post.find({ tags: req.params.name })
-        .populate("author")
-        .populate("category")
-        .populate({ path: "comments", populate: { path: "user" } })
-        .exec(),
-    ]);
+    const post = await Post.find({ tags: req.params.name })
+      .populate("author")
+      .populate("category")
+      .populate({ path: "comments", populate: { path: "user" } })
+      .exec();
 
     if (post === null) {
       const err = new Error("No posts have been found based on that tag.");
@@ -173,7 +171,7 @@ router.post(
 );
 
 router.post(
-  "/posts/:id/category",
+  "/posts/category/:name",
   verifyToken,
 
   body("category", "Category must be between 3 and 30 characters long.")
@@ -185,7 +183,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findById(req.params.id).exec();
+    const post = await Post.find({ name: req.params.name }).exec();
 
     const category = new Category({
       category: req.body.category,
