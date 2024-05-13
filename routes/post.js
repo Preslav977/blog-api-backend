@@ -50,7 +50,7 @@ router.get(
   "/posts/category/:name",
 
   asyncHandler(async (req, res, next) => {
-    const post = await Post.find({ name: req.params.name })
+    const post = await Post.find({ category: req.params.name })
       .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
