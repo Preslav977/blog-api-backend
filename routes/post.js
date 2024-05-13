@@ -47,10 +47,10 @@ router.get(
 );
 
 router.get(
-  "/posts/:id/category",
+  "/posts/category/:name",
 
   asyncHandler(async (req, res, next) => {
-    const post = await Post.find({ category: req.params.id })
+    const post = await Post.find({ category: req.params.name })
       .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
@@ -171,7 +171,7 @@ router.post(
 );
 
 router.post(
-  "/posts/category/:name",
+  "/posts/:id/category/",
   verifyToken,
 
   body("category", "Category must be between 3 and 30 characters long.")
@@ -183,7 +183,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.find({ name: req.params.name }).exec();
+    const post = await Post.findById(req.params.id).exec();
 
     const category = new Category({
       category: req.body.category,
