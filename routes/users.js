@@ -23,7 +23,7 @@ router.post(
     jwt.sign(
       { loggedUser },
       process.env.SECRET,
-      { expiresIn: "60m" },
+      { expiresIn: "15m" },
       (err, token) =>
         // const bearerArrayToken = ["Bearer", token];
 
@@ -85,8 +85,6 @@ router.post(
         verified_status: false,
       });
 
-      console.log(user);
-
       if (!errors.isEmpty()) {
         console.log(errors);
       } else {
@@ -97,8 +95,8 @@ router.post(
         if (userEmailExists) {
           res.json({ message: "Username with that email already exists." });
         } else {
+          res.json({ message: "Successfully created user." });
           await user.save();
-          res.json(user);
         }
       }
     });

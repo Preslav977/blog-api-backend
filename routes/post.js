@@ -1,4 +1,10 @@
 const express = require("express");
+const verifyToken = require("../middleware/verifyToken");
+const multer = require("multer");
+
+const uploadFile = multer({ dest: "./public/storage" });
+const cloudinary = require("cloudinary").v2;
+const fs = require("node:fs");
 
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
@@ -7,13 +13,12 @@ const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
 
-const verifyToken = require("../middleware/verifyToken");
-
 router.get(
   "/posts",
   asyncHandler(async (req, res, next) => {
     const posts = await Post.find()
       .sort({ title: 1 })
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -27,6 +32,7 @@ router.get(
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -41,15 +47,17 @@ router.get(
 );
 
 router.get(
-  "/posts/:id/category",
+  "/posts/category/:id",
 
   asyncHandler(async (req, res, next) => {
     const post = await Post.find({ category: req.params.id })
-      .populate("category")
+      .populate("author")
+      .populate({ path: "category", populate: { path: "category" } })
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
 
     console.log(post);
+
     if (post === null) {
       const err = new Error("Post not found.");
       err.status = 404;
@@ -60,14 +68,13 @@ router.get(
 );
 
 router.get(
-  "/posts/:name/tag/",
+  "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
-    const post = await Promise.all([
-      Post.findOne({ tags: req.params.name })
-        .populate("category")
-        .populate({ path: "comments", populate: { path: "user" } })
-        .exec(),
-    ]);
+    const post = await Post.find({ tags: req.params.name })
+      .populate("author")
+      .populate("category")
+      .populate({ path: "comments", populate: { path: "user" } })
+      .exec();
 
     if (post === null) {
       const err = new Error("No posts have been found based on that tag.");
@@ -84,6 +91,7 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
+  uploadFile.single("uploaded_file"),
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -101,7 +109,7 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 50000 })
     .escape(),
-  body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
+  body("tags", "Tags must be 5 and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
     .isLength({ max: 30 })
@@ -119,6 +127,16 @@ router.post(
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
+
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
 
     const post = new Post({
       title: req.body.title,
@@ -154,7 +172,7 @@ router.post(
 );
 
 router.post(
-  "/posts/:id/category",
+  "/posts/:id/category/",
   verifyToken,
 
   body("category", "Category must be between 3 and 30 characters long.")
@@ -172,17 +190,27 @@ router.post(
       category: req.body.category,
     });
 
-    console.log(category);
-
-    console.log(post);
-
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      post.category.push(category);
-      await category.save();
-      await post.save();
-      res.json(post);
+      const postCategoryExists = await Category.findOne({
+        category: req.body.category,
+      })
+        .collation({ locale: "en", strength: 2 })
+        .exec();
+
+      console.log(postCategoryExists);
+
+      if (postCategoryExists) {
+        post.category.push(postCategoryExists);
+        await post.save();
+        res.json(post);
+      } else {
+        post.category.push(category);
+        await category.save();
+        await post.save();
+        res.json(post);
+      }
     }
   }),
 );
@@ -235,6 +263,7 @@ router.post(
 
 router.put(
   "/posts/:id",
+  uploadFile.single("uploaded_file"),
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -275,6 +304,16 @@ router.put(
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
+
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
 
     const post = new Post({
       title: req.body.title,
@@ -347,6 +386,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id)
+        .populate("author")
         .populate("category")
         .populate("comments")
         .exec(),
