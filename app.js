@@ -29,6 +29,12 @@ db.on("error", console.error.bind(console, "mongo connection error"));
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.API_key,
+  api_secret: process.env.API_secret,
+});
+
 app.use(
   session({
     secret: process.env.secret,
@@ -37,21 +43,10 @@ app.use(
   }),
 );
 
-cloudinary.config({
-  cloud_name: process.env.cloud_name,
-  api_key: process.env.API_key,
-  api_secret: process.env.API_secret,
-});
-
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
 
 app.use(cors({ origin: true, credentials: true }));
-
-app.use((req, res, next) => {
-  res.locals.loggedUser = req.loggedUser;
-  next();
-});
 
 passport.use(
   new LocalStrategy(
@@ -62,10 +57,12 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await User.findOne({ email });
+        // console.log(user);
         if (!user) {
           return done(null, false, { message: "Incorrect email" });
         }
         const match = await bcrypt.compare(password, user.password);
+        // console.log(match);
         if (!match) {
           return done(null, false, { message: "Incorrect password" });
         }
@@ -78,12 +75,14 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
+  // console.log(user);
   done(null, user.id);
 });
 
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
+    // console.log(user);
     done(null, user);
   } catch (err) {
     done(err);

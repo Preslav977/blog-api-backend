@@ -16,22 +16,14 @@ router.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const { loggedUser } = req;
+    const { user } = req;
 
-    console.log(loggedUser);
+    console.log(user);
 
-    jwt.sign(
-      { loggedUser },
-      process.env.SECRET,
-      { expiresIn: "15m" },
-      (err, token) =>
-        // const bearerArrayToken = ["Bearer", token];
-
-        // localStorage.setItem("token", token);
-
-        res.json({
-          token,
-        }),
+    jwt.sign({ user }, process.env.SECRET, { expiresIn: "15m" }, (err, token) =>
+      res.json({
+        token,
+      }),
     );
   },
 );
