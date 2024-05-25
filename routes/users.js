@@ -12,13 +12,25 @@ const User = require("../models/user");
 
 const verifyToken = require("../middleware/verifyToken");
 
+router.get(
+  "/:id",
+  asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.params.id).exec();
+
+    if (user === null) {
+      const err = new Error("User not found.");
+      err.status = 404;
+      return next(err);
+    }
+    res.json(user);
+  }),
+);
+
 router.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const { user } = req;
-
-    console.log(user);
+    const user = {};
 
     jwt.sign({ user }, process.env.SECRET, { expiresIn: "15m" }, (err, token) =>
       res.json({
