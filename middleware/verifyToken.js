@@ -1,16 +1,14 @@
 const jwt = require("jsonwebtoken");
 
 function verifyToken(req, res, next) {
-  const retrieveFromLocalStorage = JSON.parse(localStorage.getItem("token"));
+  const bearerHeader = req.headers.authorization;
 
-  const retrieveToken = retrieveFromLocalStorage.join(" ");
+  const bearerHeaderParse = JSON.parse(bearerHeader);
 
-  const bearerHeader = retrieveToken;
-
-  console.log(bearerHeader);
+  const bearerHeaderJoin = bearerHeaderParse.join(" ");
 
   if (typeof bearerHeader !== "undefined") {
-    const bearer = bearerHeader.split(" ");
+    const bearer = bearerHeaderJoin.split(" ");
 
     const bearerToken = bearer[1];
 

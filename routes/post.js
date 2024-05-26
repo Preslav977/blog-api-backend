@@ -29,7 +29,6 @@ router.get(
 
 router.get(
   "/posts/:id",
-
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
       .populate("author")
