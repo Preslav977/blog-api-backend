@@ -16,7 +16,7 @@ router.get(
   "/",
   verifyToken,
   asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.body.id).exec();
+    const user = await User.findById(req.authData.userId).exec();
 
     if (user === null) {
       const err = new Error("User not found.");

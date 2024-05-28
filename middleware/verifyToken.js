@@ -19,7 +19,6 @@ function verifyToken(req, res, next) {
         res.sendStatus(403);
       } else {
         req.authData = authData;
-
         next();
       }
     });

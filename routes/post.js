@@ -230,10 +230,11 @@ router.post(
     const post = await Post.findById(req.params.id).exec();
 
     const comment = new Comment({
+      _id: req.authData.userId,
       content: req.body.content,
       date: new Date(),
       like: 0,
-      user: req.body.user,
+      user: req.authData.userId,
       hidden: false,
     });
 
@@ -401,7 +402,7 @@ router.delete(
 );
 
 router.delete(
-  "/posts/:id/comment/:commentId",
+  "/posts/:id/comment/",
   verifyToken,
 
   asyncHandler(async (req, res) => {
@@ -411,14 +412,14 @@ router.delete(
 
     const comment = new Comment({
       hidden: true,
-      _id: req.params.commentId,
+      _id: req.body.id,
     });
 
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      await Post.findByIdAndUpdate(req.params.commentId, comment);
-      await Comment.findByIdAndUpdate(req.params.commentId, comment);
+      await Post.findByIdAndUpdate(req.body.id, comment);
+      await Comment.findByIdAndUpdate(req.body.id, comment);
     }
     res.json(post);
   }),
