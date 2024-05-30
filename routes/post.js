@@ -1,5 +1,5 @@
 const express = require("express");
-const verifyToken = require("../middleware/verifyToken");
+
 const multer = require("multer");
 
 const uploadFile = multer({ dest: "./public/storage" });
@@ -9,6 +9,7 @@ const fs = require("node:fs");
 const router = express.Router();
 const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
+const verifyToken = require("../middleware/verifyToken");
 const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
@@ -230,7 +231,7 @@ router.post(
     const post = await Post.findById(req.params.id).exec();
 
     const comment = new Comment({
-      _id: req.authData.userId,
+      _id: req.body.id,
       content: req.body.content,
       date: new Date(),
       like: 0,
@@ -347,7 +348,7 @@ router.put(
 );
 
 router.put(
-  "/posts/:id/comments/:commentId",
+  "/posts/:id/comments/",
   verifyToken,
 
   body("content", "Content must be between 5 and 100 characters long.")
@@ -363,9 +364,9 @@ router.put(
 
     const comment = new Comment({
       content: req.body.content,
-      date: new Date(),
-      like: 0,
-      _id: req.params.commentId,
+      // date: new Date(),
+      like: req.body.like,
+      _id: req.body.id,
     });
 
     console.log(post);
@@ -373,8 +374,8 @@ router.put(
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
-      await Post.findByIdAndUpdate(req.params.commentId, comment);
-      await Comment.findByIdAndUpdate(req.params.commentId, comment);
+      await Post.findByIdAndUpdate(req.body.id, comment);
+      await Comment.findByIdAndUpdate(req.body.id, comment);
       res.json(post);
     }
   }),

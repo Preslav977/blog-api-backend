@@ -10,6 +10,10 @@ function verifyToken(req, res, next) {
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeaderJoin.split(" ");
 
+    // const bearer = bearerHeader.split(" ");
+
+    console.log(bearer);
+
     const bearerToken = bearer[1];
 
     req.token = bearerToken;
