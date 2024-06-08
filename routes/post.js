@@ -37,6 +37,8 @@ router.get(
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
 
+    console.log(post.formattedDate);
+
     if (post === null) {
       const err = new Error("Post not found.");
       err.status = 404;
@@ -91,8 +93,8 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
-  uploadFile.single("uploaded_file"),
   verifyToken,
+  // uploadFile.single("uploaded_file"),
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -152,10 +154,13 @@ router.post(
       comments: [],
     });
 
-    console.log(post);
+    console.log(req.body);
+
+ 
+    // console.log(post);
 
     if (!errors.isEmpty()) {
-      console.log(errors);
+      res.json({ message: "Failed to create a post." });
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -351,11 +356,11 @@ router.put(
   "/posts/:id/comments/",
   verifyToken,
 
-  body("content", "Content must be between 5 and 100 characters long.")
-    .trim()
-    .isLength({ min: 5 })
-    .isLength({ max: 100 })
-    .escape(),
+  // body("content", "Content must be between 5 and 100 characters long.")
+  //   .trim()
+  //   .isLength({ min: 5 })
+  //   .isLength({ max: 100 })
+  //   .escape(),
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
@@ -363,20 +368,20 @@ router.put(
     const post = await Post.findById(req.params.id).exec();
 
     const comment = new Comment({
-      content: req.body.content,
+      // content: req.body.content,
       // date: new Date(),
       like: req.body.like,
       _id: req.body.id,
     });
 
-    console.log(post);
+    console.log(comment);
 
     if (!errors.isEmpty()) {
       console.log(errors.array());
     } else {
       await Post.findByIdAndUpdate(req.body.id, comment);
       await Comment.findByIdAndUpdate(req.body.id, comment);
-      res.json(post);
+      res.json(comment);
     }
   }),
 );

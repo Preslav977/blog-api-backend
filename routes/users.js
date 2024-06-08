@@ -16,7 +16,7 @@ router.get(
   "/",
   verifyToken,
   asyncHandler(async (req, res, next) => {
-    const user = await User.findById(req.authData.userId).exec();
+    const user = await User.findById(req.authData._id).exec();
 
     if (user === null) {
       const err = new Error("User not found.");
@@ -31,16 +31,20 @@ router.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const userId = req.user._id;
+    const { _id, verified_status } = req.user;
+
+    console.log(_id, verified_status);
 
     jwt.sign(
-      { userId },
+      { _id, verified_status },
       process.env.SECRET,
       { expiresIn: "15m" },
-      (err, token) =>
-        res.json({
-          token,
-        }),
+      (err, token) => {
+        if (!verified_status) {
+          res.json({ message: "Unauthorized" });
+        }
+        res.json({ token });
+      },
     );
   },
 );

@@ -57,17 +57,18 @@ passport.use(
     async (email, password, done) => {
       try {
         const user = await User.findOne({ email });
-
+        // console.log(user);
         if (!user) {
           return done(null, false, { message: "Incorrect email" });
         }
         const match = await bcrypt.compare(password, user.password);
-
+        // console.log(match);
         if (!match) {
           return done(null, false, { message: "Incorrect password" });
         }
         return done(null, user);
       } catch (err) {
+        // console.log(err);
         return done(err);
       }
     },
@@ -81,9 +82,10 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   try {
     const user = await User.findById(id);
-
+    // console.log(user);
     done(null, user);
   } catch (err) {
+    // console.log(err);
     done(err);
   }
 });
@@ -99,6 +101,7 @@ app.post(
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {
+      // console.log(err);
       return next(err);
     }
     res.redirect("/");
