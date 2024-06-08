@@ -95,7 +95,7 @@ router.post(
         last_name: req.body.last_name,
         password: hashedPassword,
         confirm_password: hashedPassword,
-        verified_status: false,
+        verified_status: true,
       });
 
       if (!errors.isEmpty()) {

@@ -11,6 +11,8 @@ const passport = require("passport");
 const mongoose = require("mongoose");
 const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
+const cloudinary = require("cloudinary").v2;
+const cors = require("cors");
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
@@ -43,8 +45,16 @@ app.use(
   }),
 );
 
+cloudinary.config({
+  cloud_name: process.env.cloud_name,
+  api_key: process.env.API_key,
+  api_secret: process.env.API_secret,
+});
+
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
+
+app.use(cors({ origin: true, credentials: true }));
 
 app.use(cors({ origin: true, credentials: true }));
 
@@ -98,6 +108,7 @@ app.post(
   }),
 );
 
+app.get("/logout", (req, res, next) => {
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {

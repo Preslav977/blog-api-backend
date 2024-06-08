@@ -1,4 +1,10 @@
 const express = require("express");
+const verifyToken = require("../middleware/verifyToken");
+const multer = require("multer");
+
+const uploadFile = multer({ dest: "./public/storage" });
+const cloudinary = require("cloudinary").v2;
+const fs = require("node:fs");
 
 const multer = require("multer");
 
@@ -20,6 +26,7 @@ router.get(
     const posts = await Post.find()
       .sort({ title: 1 })
       .populate("author")
+      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -32,6 +39,7 @@ router.get(
   "/posts/:id",
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
+      .populate("author")
       .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
@@ -49,9 +57,13 @@ router.get(
 );
 
 router.get(
+  "/posts/category/:name",
   "/posts/category/:id",
 
   asyncHandler(async (req, res, next) => {
+    const post = await Post.find({ category: req.params.name })
+      .populate("author")
+      .populate("category");
     const post = await Post.find({ category: req.params.id })
       .populate("author")
       .populate({ path: "category", populate: { path: "category" } })
@@ -71,7 +83,13 @@ router.get(
 
 router.get(
   "/posts/tag/:name",
+  "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
+    const post = await Post.find({ tags: req.params.name })
+      .populate("author")
+      .populate("category")
+      .populate({ path: "comments", populate: { path: "user" } })
+      .exec();
     const post = await Post.find({ tags: req.params.name })
       .populate("author")
       .populate("category")
@@ -93,6 +111,7 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
+  uploadFile.single("uploaded_file"),
   verifyToken,
   // uploadFile.single("uploaded_file"),
 
@@ -140,6 +159,16 @@ router.post(
     //     .end(byteArrayBuffer);
     // });
 
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
+
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
+
     const post = new Post({
       title: req.body.title,
       author: req.body.author,
@@ -156,7 +185,6 @@ router.post(
 
     console.log(req.body);
 
- 
     // console.log(post);
 
     if (!errors.isEmpty()) {
@@ -177,6 +205,7 @@ router.post(
 );
 
 router.post(
+  "/posts/:id/category/",
   "/posts/:id/category/",
   verifyToken,
 
@@ -270,6 +299,7 @@ router.post(
 router.put(
   "/posts/:id",
   uploadFile.single("uploaded_file"),
+  uploadFile.single("uploaded_file"),
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -310,6 +340,16 @@ router.put(
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
+
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
+
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
 
     // const byteArrayBuffer = fs.readFileSync(
     //   `./public/storage/${req.file.filename}`,
@@ -392,6 +432,7 @@ router.delete(
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id)
+        .populate("author")
         .populate("author")
         .populate("category")
         .populate("comments")
