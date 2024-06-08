@@ -1,11 +1,4 @@
 const express = require("express");
-const verifyToken = require("../middleware/verifyToken");
-const multer = require("multer");
-
-const uploadFile = multer({ dest: "./public/storage" });
-const cloudinary = require("cloudinary").v2;
-const fs = require("node:fs");
-
 const multer = require("multer");
 
 const uploadFile = multer({ dest: "./public/storage" });
@@ -57,13 +50,8 @@ router.get(
 );
 
 router.get(
-  "/posts/category/:name",
   "/posts/category/:id",
-
   asyncHandler(async (req, res, next) => {
-    const post = await Post.find({ category: req.params.name })
-      .populate("author")
-      .populate("category");
     const post = await Post.find({ category: req.params.id })
       .populate("author")
       .populate({ path: "category", populate: { path: "category" } })
@@ -83,13 +71,7 @@ router.get(
 
 router.get(
   "/posts/tag/:name",
-  "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
-    const post = await Post.find({ tags: req.params.name })
-      .populate("author")
-      .populate("category")
-      .populate({ path: "comments", populate: { path: "user" } })
-      .exec();
     const post = await Post.find({ tags: req.params.name })
       .populate("author")
       .populate("category")
@@ -206,7 +188,6 @@ router.post(
 
 router.post(
   "/posts/:id/category/",
-  "/posts/:id/category/",
   verifyToken,
 
   body("category", "Category must be between 3 and 30 characters long.")
@@ -298,7 +279,6 @@ router.post(
 
 router.put(
   "/posts/:id",
-  uploadFile.single("uploaded_file"),
   uploadFile.single("uploaded_file"),
   verifyToken,
 

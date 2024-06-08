@@ -9,10 +9,8 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const mongoose = require("mongoose");
-const cloudinary = require("cloudinary").v2;
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
-const cors = require("cors");
 
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
@@ -53,8 +51,6 @@ cloudinary.config({
 
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
-
-app.use(cors({ origin: true, credentials: true }));
 
 app.use(cors({ origin: true, credentials: true }));
 
@@ -108,7 +104,6 @@ app.post(
   }),
 );
 
-app.get("/logout", (req, res, next) => {
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {
