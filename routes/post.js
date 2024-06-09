@@ -19,7 +19,6 @@ router.get(
     const posts = await Post.find()
       .sort({ title: 1 })
       .populate("author")
-      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -32,7 +31,6 @@ router.get(
   "/posts/:id",
   asyncHandler(async (req, res, next) => {
     const post = await Post.findById(req.params.id)
-      .populate("author")
       .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
@@ -53,7 +51,6 @@ router.get(
   "/posts/category/:id",
   asyncHandler(async (req, res, next) => {
     const post = await Post.find({ category: req.params.id })
-      .populate("author")
       .populate({ path: "category", populate: { path: "category" } })
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -73,7 +70,6 @@ router.get(
   "/posts/tag/:name",
   asyncHandler(async (req, res, next) => {
     const post = await Post.find({ tags: req.params.name })
-      .populate("author")
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
@@ -165,12 +161,12 @@ router.post(
       comments: [],
     });
 
-    console.log(req.body);
-
     // console.log(post);
 
     if (!errors.isEmpty()) {
-      res.json({ message: "Failed to create a post." });
+      // res.json({ message: "Failed to create a post." });
+      console.log(errors.array());
+      console.log(errors);
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -223,53 +219,6 @@ router.post(
       } else {
         post.category.push(category);
         await category.save();
-        await post.save();
-        res.json(post);
-      }
-    }
-  }),
-);
-
-router.post(
-  "/posts/:id/comments",
-  verifyToken,
-
-  body("content", "Content must be between 5 and 100 characters long.")
-    .trim()
-    .isLength({ min: 5 })
-    .isLength({ max: 100 })
-    .escape(),
-
-  asyncHandler(async (req, res) => {
-    const errors = validationResult(req);
-
-    const post = await Post.findById(req.params.id).exec();
-
-    const comment = new Comment({
-      _id: req.body.id,
-      content: req.body.content,
-      date: new Date(),
-      like: 0,
-      user: req.authData.userId,
-      hidden: false,
-    });
-
-    console.log(post);
-
-    if (!errors.isEmpty()) {
-      console.log(errors.array());
-    } else {
-      const checkIfSameCommentExists = await Comment.findOne({
-        content: req.body.content,
-      })
-        .collation({ locale: "en", strength: 2 })
-        .exec();
-
-      if (checkIfSameCommentExists) {
-        res.json({ message: "Comment with this content already exists" });
-      } else {
-        post.comments.push(comment);
-        await comment.save();
         await post.save();
         res.json(post);
       }
@@ -412,7 +361,6 @@ router.delete(
   asyncHandler(async (req, res) => {
     const post = await Promise.all([
       Post.findById(req.params.id)
-        .populate("author")
         .populate("author")
         .populate("category")
         .populate("comments")

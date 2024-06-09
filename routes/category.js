@@ -6,6 +6,15 @@ const asyncHandler = require("express-async-handler");
 const { body, validationResult } = require("express-validator");
 const Category = require("../models/category");
 
+router.get(
+  "/",
+  asyncHandler(async (req, res, next) => {
+    const category = await Category.find().sort({ title: 1 }).exec();
+
+    res.json(category);
+  }),
+);
+
 router.post(
   "/create",
 
