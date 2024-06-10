@@ -1,7 +1,5 @@
 const express = require("express");
 const multer = require("multer");
-
-const uploadFile = multer({ dest: "./public/storage" });
 const cloudinary = require("cloudinary").v2;
 const fs = require("node:fs");
 
@@ -12,6 +10,8 @@ const verifyToken = require("../middleware/verifyToken");
 const Post = require("../models/post");
 const Category = require("../models/category");
 const Comment = require("../models/comments");
+
+// const upload = multer({ dest: "./public/data/uploads" });
 
 router.get(
   "/posts",
@@ -35,8 +35,6 @@ router.get(
       .populate("category")
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
-
-    console.log(post.formattedDate);
 
     if (post === null) {
       const err = new Error("Post not found.");
@@ -89,9 +87,8 @@ router.get("/posts/latest/:id", (req, res) => {
 
 router.post(
   "/posts",
-  uploadFile.single("uploaded_file"),
   verifyToken,
-  // uploadFile.single("uploaded_file"),
+  // upload.single("image_link"),
 
   body("title", "Title must be between 5 and 80 characters long.")
     .trim()
@@ -128,17 +125,7 @@ router.post(
     const errors = validationResult(req);
 
     // const byteArrayBuffer = fs.readFileSync(
-    //   `./public/storage/${req.file.filename}`,
-    // );
-
-    // const uploadResult = await new Promise((resolve) => {
-    //   cloudinary.uploader
-    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
-    //     .end(byteArrayBuffer);
-    // });
-
-    // const byteArrayBuffer = fs.readFileSync(
-    //   `./public/storage/${req.file.filename}`,
+    //   `./public/data/uploads/${req.file.filename}`,
     // );
 
     // const uploadResult = await new Promise((resolve) => {
@@ -161,12 +148,8 @@ router.post(
       comments: [],
     });
 
-    // console.log(post);
-
     if (!errors.isEmpty()) {
-      // res.json({ message: "Failed to create a post." });
-      console.log(errors.array());
-      console.log(errors);
+      res.json({ message: "Failed to create a post." });
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -195,7 +178,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findById(req.params.id).exec();
+    const post = await Post.findById(req.body.id).exec();
 
     const category = new Category({
       category: req.body.category,
@@ -226,9 +209,57 @@ router.post(
   }),
 );
 
+router.post(
+  "/posts/:id/comments/",
+  verifyToken,
+
+  body("content", "Content must be between 5 and 100 characters long.")
+    .trim()
+    .isLength({ min: 5 })
+    .isLength({ max: 100 })
+    .escape(),
+
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    const post = await Post.findById(req.params.id).exec();
+
+    const comment = new Comment({
+      content: req.body.content,
+      date: new Date(),
+      user: req.authData._id,
+    });
+
+    console.log(comment);
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      post.comments.push(comment);
+      await comment.save();
+      await post.save();
+      // res.json(post);
+      const checkIfSameCommentExists = await Comment.findOne({
+        content: req.body.content,
+      })
+        .collation({ locale: "en", strength: 2 })
+        .exec();
+
+      if (checkIfSameCommentExists) {
+        res.json({ message: "Comment with this content already exists" });
+      } else {
+        post.comments.push(comment);
+        await comment.save();
+        await post.save();
+        res.json(post);
+      }
+    }
+  }),
+);
+
 router.put(
   "/posts/:id",
-  uploadFile.single("uploaded_file"),
+  // upload.single("uploaded_file")s,
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -270,25 +301,15 @@ router.put(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    // const byteArrayBuffer = fs.readFileSync(
-    //   `./public/storage/${req.file.filename}`,
-    // );
+    const byteArrayBuffer = fs.readFileSync(
+      `./public/storage/${req.file.filename}`,
+    );
 
-    // const uploadResult = await new Promise((resolve) => {
-    //   cloudinary.uploader
-    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
-    //     .end(byteArrayBuffer);
-    // });
-
-    // const byteArrayBuffer = fs.readFileSync(
-    //   `./public/storage/${req.file.filename}`,
-    // );
-
-    // const uploadResult = await new Promise((resolve) => {
-    //   cloudinary.uploader
-    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
-    //     .end(byteArrayBuffer);
-    // });
+    const uploadResult = await new Promise((resolve) => {
+      cloudinary.uploader
+        .upload_stream((error, uploadResult) => resolve(uploadResult))
+        .end(byteArrayBuffer);
+    });
 
     const post = new Post({
       title: req.body.title,
@@ -297,7 +318,7 @@ router.put(
       body: req.body.body,
       category: [],
       tags: req.body.tags,
-      image_link: req.body.image_link,
+      image_link: uploadResult.url,
       image_owner: req.body.image_owner,
       image_source: req.body.image_source,
       privacy: req.body.privacy,
@@ -317,6 +338,25 @@ router.put(
       post.category.push(category);
       const updatePost = await Post.findByIdAndUpdate(req.params.id, post);
       res.json(updatePost);
+    }
+  }),
+);
+
+router.put(
+  "/post/:id",
+  verifyToken,
+
+  asyncHandler(async (req, res) => {
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      console.log(errors.array());
+    } else {
+      const post = await Post.updateOne(
+        { _id: req.body.id },
+        { $set: { privacy: req.body.privacy } },
+      );
+      res.json(post);
     }
   }),
 );
@@ -359,18 +399,16 @@ router.delete(
   "/posts/:id",
   verifyToken,
   asyncHandler(async (req, res) => {
-    const post = await Promise.all([
-      Post.findById(req.params.id)
-        .populate("author")
-        .populate("category")
-        .populate("comments")
-        .exec(),
-    ]);
+    const post = await Post.findById(req.body.id)
+      .populate("author")
+      .populate("category")
+      .populate("comments")
+      .exec();
 
     if (post === null) {
       res.redirect("/");
     } else {
-      await Post.findByIdAndDelete(req.params.id);
+      await Post.findByIdAndDelete(req.body.id);
       res.json(post);
     }
   }),
@@ -396,7 +434,7 @@ router.delete(
       await Post.findByIdAndUpdate(req.body.id, comment);
       await Comment.findByIdAndUpdate(req.body.id, comment);
     }
-    res.json(post);
+    res.json(comment);
   }),
 );
 
