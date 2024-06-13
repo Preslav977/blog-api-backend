@@ -31,8 +31,6 @@ router.post(
       category: req.body.category,
     });
 
-    console.log(category);
-
     if (!errors.isEmpty()) {
       console.log(errors);
     } else {
@@ -46,7 +44,7 @@ router.post(
         res.json({ message: "Category already exists with that name." });
       } else {
         await category.save();
-        res.json(category);
+        res.json({ message: "Category has been created." });
       }
     }
   }),

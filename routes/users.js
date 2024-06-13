@@ -31,16 +31,33 @@ router.post(
   "/login",
   passport.authenticate("local", { session: false }),
   (req, res) => {
-    const { _id, verified_status } = req.user;
+    const { _id } = req.user;
+
+    jwt.sign(
+      { _id },
+      process.env.SECRET,
+      { expiresIn: "15m" },
+      (err, token) => {
+        res.json({ token });
+      },
+    );
+  },
+);
+
+router.post(
+  "/login_verified",
+  passport.authenticate("local", { session: false }),
+  (req, res) => {
+    const { _id, verified_status, admin } = req.user;
 
     console.log(_id, verified_status);
 
     jwt.sign(
-      { _id, verified_status },
+      { _id, verified_status, admin },
       process.env.SECRET,
       { expiresIn: "15m" },
       (err, token) => {
-        if (!verified_status) {
+        if (!verified_status || !admin) {
           res.json({ message: "Unauthorized" });
         }
         res.json({ token });
@@ -48,6 +65,16 @@ router.post(
     );
   },
 );
+
+router.get("/logout", (req, res, next) => {
+  console.log(req);
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
 
 router.post(
   "/signup",
@@ -95,11 +122,12 @@ router.post(
         last_name: req.body.last_name,
         password: hashedPassword,
         confirm_password: hashedPassword,
-        verified_status: true,
+        verified_status: false,
+        admin: false,
       });
 
       if (!errors.isEmpty()) {
-        console.log(errors);
+        res.json({ message: "Failed to created user." });
       } else {
         const userEmailExists = await User.findOne({ email: req.body.email })
           .collation({ locale: "en", strength: 2 })
@@ -166,10 +194,8 @@ router.put(
         _id: req.params.id,
       });
 
-      console.log(user);
-
       if (!errors.isEmpty()) {
-        console.log(errors);
+        res.json({ message: "User not successfully updated." });
       } else {
         const updateUser = await User.findByIdAndUpdate(req.params.id, user);
         res.json(updateUser);

@@ -14,6 +14,7 @@ const UserSchema = new Schema({
     required: true,
   },
   verified_status: { type: Boolean },
+  admin: { type: Boolean },
 });
 
 module.exports = mongoose.model("User", UserSchema);

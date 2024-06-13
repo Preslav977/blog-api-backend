@@ -85,6 +85,8 @@ router.get("/posts/latest/:id", (req, res) => {
   // TODO: When you figure out how to make 10 posts on each page.
 });
 
+// TODO: Figure out how to send from frontend to backend the image
+
 router.post(
   "/posts",
   verifyToken,
@@ -95,16 +97,12 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 80 })
     .escape(),
-  body("author", "Author must be between 5 and 80 characters long.")
-    .trim()
-    .isLength({ min: 5 })
-    .isLength({ max: 80 })
-    .escape(),
+  body("author").escape(),
   body("body", "Body must be between 5 and 50000 characters long.")
     .trim()
     .isLength({ min: 5 })
-    .isLength({ max: 50000 })
-    .escape(),
+    .isLength({ max: 50000 }),
+  // .escape(),
   body("tags", "Tags must be 5 and 30 characters long.")
     .trim()
     .isLength({ min: 5 })
@@ -150,6 +148,7 @@ router.post(
 
     if (!errors.isEmpty()) {
       res.json({ message: "Failed to create a post." });
+      console.log(errors);
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -178,22 +177,20 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findById(req.body.id).exec();
+    const post = await Post.findById(req.params.id).exec();
 
     const category = new Category({
       category: req.body.category,
     });
 
     if (!errors.isEmpty()) {
-      console.log(errors.array());
+      res.json({ message: "Failed to created the post with a category" });
     } else {
       const postCategoryExists = await Category.findOne({
         category: req.body.category,
       })
         .collation({ locale: "en", strength: 2 })
         .exec();
-
-      console.log(postCategoryExists);
 
       if (postCategoryExists) {
         post.category.push(postCategoryExists);
@@ -203,6 +200,7 @@ router.post(
         post.category.push(category);
         await category.save();
         await post.save();
+        console.log(post);
         res.json(post);
       }
     }
@@ -230,15 +228,12 @@ router.post(
       user: req.authData._id,
     });
 
-    console.log(comment);
-
     if (!errors.isEmpty()) {
-      console.log(errors.array());
+      res.json({ message: "Failed to create a comment " });
     } else {
       post.comments.push(comment);
       await comment.save();
       await post.save();
-      // res.json(post);
       const checkIfSameCommentExists = await Comment.findOne({
         content: req.body.content,
       })
@@ -259,7 +254,6 @@ router.post(
 
 router.put(
   "/posts/:id",
-  // upload.single("uploaded_file")s,
   verifyToken,
 
   body("title", "Title must be between 5 and 80 characters long.")
@@ -267,16 +261,12 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 80 })
     .escape(),
-  body("author", "Author must be between 5 and 80 characters long.")
-    .trim()
-    .isLength({ min: 5 })
-    .isLength({ max: 80 })
-    .escape(),
+  body("author", "Author must be between 5 and 80 characters long.").escape(),
   body("body", "Body must be between 5 and 50000 characters long.")
     .trim()
     .isLength({ min: 5 })
-    .isLength({ max: 50000 })
-    .escape(),
+    .isLength({ max: 50000 }),
+  // .escape(),
   body("category", "Category must be between 3 and 30 characters long.")
     .trim()
     .isLength({ min: 3 })
@@ -301,15 +291,15 @@ router.put(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const byteArrayBuffer = fs.readFileSync(
-      `./public/storage/${req.file.filename}`,
-    );
+    // const byteArrayBuffer = fs.readFileSync(
+    //   `./public/storage/${req.file.filename}`,
+    // );
 
-    const uploadResult = await new Promise((resolve) => {
-      cloudinary.uploader
-        .upload_stream((error, uploadResult) => resolve(uploadResult))
-        .end(byteArrayBuffer);
-    });
+    // const uploadResult = await new Promise((resolve) => {
+    //   cloudinary.uploader
+    //     .upload_stream((error, uploadResult) => resolve(uploadResult))
+    //     .end(byteArrayBuffer);
+    // });
 
     const post = new Post({
       title: req.body.title,
@@ -318,7 +308,7 @@ router.put(
       body: req.body.body,
       category: [],
       tags: req.body.tags,
-      image_link: uploadResult.url,
+      image_link: req.body.image_link,
       image_owner: req.body.image_owner,
       image_source: req.body.image_source,
       privacy: req.body.privacy,
@@ -330,14 +320,13 @@ router.put(
       category: req.body.category,
     });
 
-    console.log(post);
-
     if (!errors.isEmpty()) {
-      console.log(errors);
+      res.json({ message: "Failed to update the post." });
     } else {
       post.category.push(category);
-      const updatePost = await Post.findByIdAndUpdate(req.params.id, post);
-      res.json(updatePost);
+      await Post.findByIdAndUpdate(req.params.id, post);
+      console.log(post);
+      res.json(post);
     }
   }),
 );
@@ -350,7 +339,7 @@ router.put(
     const errors = validationResult(req);
 
     if (!errors.isEmpty()) {
-      console.log(errors.array());
+      res.json({ message: "Failed to update the post privacy." });
     } else {
       const post = await Post.updateOne(
         { _id: req.body.id },
@@ -360,6 +349,8 @@ router.put(
     }
   }),
 );
+
+// TODO: Using updateOne and set operator to make updating only the comment content
 
 router.put(
   "/posts/:id/comments/",
@@ -383,10 +374,8 @@ router.put(
       _id: req.body.id,
     });
 
-    console.log(comment);
-
     if (!errors.isEmpty()) {
-      console.log(errors.array());
+      res.json({ message: "Failed to update the comment." });
     } else {
       await Post.findByIdAndUpdate(req.body.id, comment);
       await Comment.findByIdAndUpdate(req.body.id, comment);
@@ -429,7 +418,7 @@ router.delete(
     });
 
     if (!errors.isEmpty()) {
-      console.log(errors.array());
+      res.json({ message: "Failed to delete the comment." });
     } else {
       await Post.findByIdAndUpdate(req.body.id, comment);
       await Comment.findByIdAndUpdate(req.body.id, comment);
