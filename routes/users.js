@@ -36,7 +36,7 @@ router.post(
     jwt.sign(
       { _id },
       process.env.SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "25m" },
       (err, token) => {
         res.json({ token });
       },
@@ -50,12 +50,10 @@ router.post(
   (req, res) => {
     const { _id, verified_status, admin } = req.user;
 
-    console.log(_id, verified_status);
-
     jwt.sign(
       { _id, verified_status, admin },
       process.env.SECRET,
-      { expiresIn: "15m" },
+      { expiresIn: "25m" },
       (err, token) => {
         if (!verified_status || !admin) {
           res.json({ message: "Unauthorized" });

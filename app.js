@@ -101,7 +101,6 @@ app.post(
 app.get("/logout", (req, res, next) => {
   req.logout((err) => {
     if (err) {
-      console.log(err);
       return next(err);
     }
     res.redirect("/");

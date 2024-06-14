@@ -53,8 +53,6 @@ router.get(
       .populate({ path: "comments", populate: { path: "user" } })
       .exec();
 
-    console.log(post);
-
     if (post === null) {
       const err = new Error("Post not found.");
       err.status = 404;
@@ -148,7 +146,6 @@ router.post(
 
     if (!errors.isEmpty()) {
       res.json({ message: "Failed to create a post." });
-      console.log(errors);
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -177,7 +174,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
 
-    const post = await Post.findById(req.params.id).exec();
+    const post = await Post.findById(req.body.id).exec();
 
     const category = new Category({
       category: req.body.category,
@@ -325,7 +322,6 @@ router.put(
     } else {
       post.category.push(category);
       await Post.findByIdAndUpdate(req.params.id, post);
-      console.log(post);
       res.json(post);
     }
   }),
@@ -423,7 +419,7 @@ router.delete(
       await Post.findByIdAndUpdate(req.body.id, comment);
       await Comment.findByIdAndUpdate(req.body.id, comment);
     }
-    res.json(comment);
+    res.json({ message: "Comment has been deleted." });
   }),
 );
 
