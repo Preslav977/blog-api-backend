@@ -12,12 +12,36 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 
+const compression = require("compression");
+const helmet = require("helmet");
+const RateLimit = require("express-rate-limit");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
 const User = require("./models/user");
 
+const limiter = RateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+});
+
 const app = express();
+
+app.use(helmet());
+
+app.use(limiter);
+
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "http://localhost:5174",
+      "https://blog-api-frontend-lime.vercel.app/",
+      "https://blog-api-cms-ten.vercel.app/",
+    ],
+    credentials: true,
+  }),
+);
 
 const mongoDB = process.env.mongoURL;
 
@@ -45,8 +69,6 @@ app.use(
 
 app.use(passport.session());
 app.use(express.urlencoded({ extended: false }));
-
-app.use(cors({ origin: true, credentials: true }));
 
 passport.use(
   new LocalStrategy(
@@ -112,6 +134,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
+
+app.use(compression());
 
 app.use("/", postsRouter);
 app.use("/user", usersRouter);
