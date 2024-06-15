@@ -101,19 +101,19 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 50000 }),
   // .escape(),
-  body("tags", "Tags must be 5 and 30 characters long.")
+  body("tags", "Tags must be 3 and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
-  body("image_owner", "Image_Owner must be between 5 and 30 characters long.")
+  body("image_owner", "Image_Owner must be between 3 and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
-  body("image_source", "Image_Source must be between 5 and 30 characters long.")
+  body("image_source", "Image_Source must be between 3 and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
 
@@ -269,19 +269,19 @@ router.put(
     .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
-  body("tags", "Tags must be 5 and 80 characters and 30 characters long.")
+  body("tags", "Tags must be 3 and 30 characters and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
-  body("image_owner", "Image_Owner must be between 5 and 30 characters long.")
+  body("image_owner", "Image_Owner must be between 3 and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
-  body("image_source", "Image_Source must be between 5 and 30 characters long.")
+  body("image_source", "Image_Source must be between 3 and 30 characters long.")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
 

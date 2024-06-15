@@ -65,7 +65,6 @@ router.post(
 );
 
 router.get("/logout", (req, res, next) => {
-  console.log(req);
   req.logout((err) => {
     if (err) {
       return next(err);
@@ -88,14 +87,14 @@ router.post(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("first_name", "First_Name must be between 5 and 30 characters")
+  body("first_name", "First_Name must be between 1 and 30 characters")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 1 })
     .isLength({ max: 30 })
     .escape(),
-  body("last_name", "Last_Name must be between 5 and 30 characters")
+  body("last_name", "Last_Name must be between 3 and 30 characters")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
   body("password", "Password must be at least 8 characters long.").isLength({
@@ -157,14 +156,14 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 30 })
     .escape(),
-  body("first_name", "First_Name must be between 5 and 30 characters")
+  body("first_name", "First_Name must be between 1 and 30 characters")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 1 })
     .isLength({ max: 30 })
     .escape(),
-  body("last_name", "Last_Name must be between 5 and 30 characters")
+  body("last_name", "Last_Name must be between 3 and 30 characters")
     .trim()
-    .isLength({ min: 5 })
+    .isLength({ min: 3 })
     .isLength({ max: 30 })
     .escape(),
   body("password", "Password must be at least 8 characters long.").isLength({
