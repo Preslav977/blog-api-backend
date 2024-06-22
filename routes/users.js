@@ -50,6 +50,8 @@ router.post(
   (req, res) => {
     const { _id, verified_status, admin } = req.user;
 
+    console.log(req.user);
+
     jwt.sign(
       { _id, verified_status, admin },
       process.env.SECRET,
@@ -58,6 +60,23 @@ router.post(
         if (!verified_status || !admin) {
           res.json({ message: "Unauthorized" });
         }
+        res.json({ token });
+      },
+    );
+  },
+);
+
+router.post(
+  "/login_test_user",
+  passport.authenticate("local", { session: false }),
+  (req, res) => {
+    const { _id, test_user } = req.user;
+
+    jwt.sign(
+      { _id, test_user },
+      process.env.SECRET,
+      { expiresIn: "25m" },
+      (err, token) => {
         res.json({ token });
       },
     );
@@ -121,6 +140,7 @@ router.post(
         confirm_password: hashedPassword,
         verified_status: false,
         admin: false,
+        // test_user: true,
       });
 
       if (!errors.isEmpty()) {
