@@ -50,8 +50,6 @@ router.post(
   (req, res) => {
     const { _id, verified_status, admin } = req.user;
 
-    console.log(req.user);
-
     jwt.sign(
       { _id, verified_status, admin },
       process.env.SECRET,
