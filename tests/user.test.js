@@ -34,4 +34,24 @@ describe("testing the user routes and controllers", () => {
     expect(response.status).toBe(200);
     expect(response.body.message).toEqual("Successfully created the user.");
   });
+
+  test("testing if the user email is already taken", async () => {
+    const creatingUser = {
+      email: "testing123@abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "user",
+      password: "12345678",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "User with that email already exists.",
+    );
+  });
 });
