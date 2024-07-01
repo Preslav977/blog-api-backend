@@ -54,4 +54,104 @@ describe("testing the user routes and controllers", () => {
       "User with that email already exists.",
     );
   });
+
+  test("testing if the provided email it is valid", async () => {
+    const creatingUser = {
+      email: "testing-abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "user",
+      password: "12345678",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "Failed to meet the constrains for creating the user.",
+    );
+  });
+
+  test("testing if the provided username it is at least 5 characters", async () => {
+    const creatingUser = {
+      email: "testing@abv.bg",
+      username: "test",
+      first_name: "p",
+      last_name: "user",
+      password: "12345678",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "Failed to meet the constrains for creating the user.",
+    );
+  });
+
+  test("testing if the provided first_name it is at least 1 character", async () => {
+    const creatingUser = {
+      email: "testing@abv.bg",
+      username: "testing",
+      first_name: "",
+      last_name: "user",
+      password: "12345678",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "Failed to meet the constrains for creating the user.",
+    );
+  });
+
+  test("testing if the provided last_name it is at least 3 characters", async () => {
+    const creatingUser = {
+      email: "testing@abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "us",
+      password: "12345678",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "Failed to meet the constrains for creating the user.",
+    );
+  });
+
+  test("testing if the provided passwords are matching", async () => {
+    const creatingUser = {
+      email: "testing@abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "us",
+      password: "1234567",
+      confirm_password: "12345678",
+      verified_status: false,
+      admin: false,
+    };
+
+    const response = await request(app).post("/user/signup").send(creatingUser);
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.body.message).toEqual(
+      "Failed to meet the constrains for creating the user.",
+    );
+  });
 });
