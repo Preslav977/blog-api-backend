@@ -73,7 +73,7 @@ router.post(
     jwt.sign(
       { _id, test_user },
       process.env.SECRET,
-      { expiresIn: "25m" },
+      { expiresIn: "15m" },
       (err, token) => {
         res.json({ token });
       },
@@ -142,16 +142,18 @@ router.post(
       });
 
       if (!errors.isEmpty()) {
-        res.json({ message: "Failed to created user." });
+        res.json({
+          message: "Failed to meet the constrains for creating the user.",
+        });
       } else {
         const userEmailExists = await User.findOne({ email: req.body.email })
           .collation({ locale: "en", strength: 2 })
           .exec();
 
         if (userEmailExists) {
-          res.json({ message: "Username with that email already exists." });
+          res.json({ message: "User with that email already exists." });
         } else {
-          res.json({ message: "Successfully created user." });
+          res.json({ message: "Successfully created the user." });
           await user.save();
         }
       }

@@ -1,0 +1,7 @@
+const mongoose = require("mongoose");
+
+const mongoDB = process.env.mongoURL;
+
+mongoose.connect(mongoDB);
+const db = mongoose.connection;
+db.on("error", console.error.bind(console, "mongo connection error"));

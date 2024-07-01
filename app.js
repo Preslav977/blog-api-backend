@@ -8,13 +8,13 @@ const session = require("express-session");
 const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const passport = require("passport");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const cloudinary = require("cloudinary").v2;
 
 const compression = require("compression");
 const helmet = require("helmet");
 const RateLimit = require("express-rate-limit");
+const mongoose = require("./mongoConfig");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
@@ -36,18 +36,12 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      "https://blog-api-frontend-lime.vercel.app",
-      "https://blog-api-cms-ten.vercel.app",
+      // "https://blog-api-frontend-lime.vercel.app",
+      // "https://blog-api-cms-ten.vercel.app",
     ],
     credentials: true,
   }),
 );
-
-const mongoDB = process.env.mongoURL;
-
-mongoose.connect(mongoDB);
-const db = mongoose.connection;
-db.on("error", console.error.bind(console, "mongo connection error"));
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));

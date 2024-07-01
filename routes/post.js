@@ -212,7 +212,7 @@ router.post(
     .trim()
     .isLength({ min: 5 })
     .isLength({ max: 100 })
-    .escape(),
+    .escape("-"),
 
   asyncHandler(async (req, res) => {
     const errors = validationResult(req);
