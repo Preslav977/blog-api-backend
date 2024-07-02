@@ -140,7 +140,7 @@ describe("testing the user routes and controllers", () => {
       email: "testing@abv.bg",
       username: "testing",
       first_name: "p",
-      last_name: "us",
+      last_name: "usawd",
       password: "1234567",
       confirm_password: "12345678",
       verified_status: false,
@@ -153,5 +153,15 @@ describe("testing the user routes and controllers", () => {
     expect(response.body.message).toEqual(
       "Failed to meet the constrains for creating the user.",
     );
+  });
+
+  test("testing if normal users can login", async () => {
+    const response = await request(app).post("/user/login").send({ _id: 0 });
+
+    console.log(response);
+
+    // expect(response.header["content-type"]).toMatch(/json/);
+
+    // console.log(response.status);
   });
 });
