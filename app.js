@@ -36,8 +36,8 @@ app.use(
     origin: [
       "http://localhost:5173",
       "http://localhost:5174",
-      // "https://blog-api-frontend-lime.vercel.app",
-      // "https://blog-api-cms-ten.vercel.app",
+      "https://blog-api-frontend-lime.vercel.app",
+      "https://blog-api-cms-ten.vercel.app",
     ],
     credentials: true,
   }),

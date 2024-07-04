@@ -1,6 +1,9 @@
 {
   "name": "express-template-repository",
   "version": "0.0.0",
+  "jest": {
+    "preset": "@shelf/jest-mongodb"
+  },
   "engines": {
     "node": ">=16"
   },
@@ -40,6 +43,7 @@
     "pug": "2.0.0-beta11"
   },
   "devDependencies": {
+    "@shelf/jest-mongodb": "^4.3.2",
     "eslint": "^8.57.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-prettier": "^9.1.0",

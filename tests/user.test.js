@@ -1,6 +1,18 @@
+require("dotenv").config();
+
 const request = require("supertest");
 
 const express = require("express");
+
+const LocalStrategy = require("passport-local").Strategy;
+
+const passport = require("passport");
+
+const session = require("express-session");
+
+const bcrypt = require("bcrypt");
+
+const User = require("../models/user");
 
 const userRouter = require("../routes/users");
 
@@ -8,15 +20,87 @@ const initializeMongoServer = require("../mongoConfigTesting");
 
 const app = express();
 
+app.use(
+  session({
+    secret: process.env.secret,
+    resave: false,
+    saveUninitialized: true,
+  }),
+);
+
+app.use(passport.session());
+app.use(express.urlencoded({ extended: false }));
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: "email",
+      passwordField: "password",
+    },
+    async (email, password, done) => {
+      try {
+        const user = await User.findOne({ email });
+        // console.log(user);
+        if (!user) {
+          return done(null, false, { message: "Incorrect email" });
+        }
+        const match = await bcrypt.compare(password, user.password);
+        // console.log(match);
+        if (!match) {
+          return done(null, false, { message: "Incorrect password" });
+        }
+        return done(null, user);
+      } catch (err) {
+        // console.log(err);
+        return done(err);
+      }
+    },
+  ),
+);
+
+passport.serializeUser((user, done) => {
+  done(null, user.id);
+});
+
+passport.deserializeUser(async (id, done) => {
+  try {
+    const user = await User.findById(id);
+    // console.log(user);
+    done(null, user);
+  } catch (err) {
+    // console.log(err);
+    done(err);
+  }
+});
+
+app.post(
+  "/login",
+  passport.authenticate("local", {
+    successRedirect: "/",
+    failureRedirect: "/",
+  }),
+);
+
+app.get("/logout", (req, res, next) => {
+  req.logout((err) => {
+    if (err) {
+      return next(err);
+    }
+    res.redirect("/");
+  });
+});
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/user", userRouter);
 
-describe("testing the user routes and controllers", () => {
-  test("testing if the user is successfully created", async () => {
-    initializeMongoServer();
+describe("testing the user routes and controllers", (done) => {
+  beforeAll(() => initializeMongoServer());
 
+  afterAll(() => done);
+
+  test("testing if the user is successfully created", async () => {
     const creatingUser = {
       email: "testing123@abv.bg",
       username: "testing",
@@ -156,12 +240,12 @@ describe("testing the user routes and controllers", () => {
   });
 
   test("testing if normal users can login", async () => {
-    const response = await request(app).post("/user/login").send({ _id: 0 });
+    const response = await request(app).post("/user/login").send({
+      email: "testing1@abv.bg",
+      password: "12345678",
+    });
 
-    console.log(response);
-
-    // expect(response.header["content-type"]).toMatch(/json/);
-
-    // console.log(response.status);
+    expect(response.status).toBe(200);
+    expect(response.body.token).toMatch(response.body.token);
   });
 });
