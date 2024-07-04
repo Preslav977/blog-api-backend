@@ -39,6 +39,31 @@ async function initializeMongoServer() {
     });
 
     await user.save();
+
+    const userVerified = new User({
+      email: "testing@abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "testing",
+      password: hashedPassword,
+      confirm_password: hashedPassword,
+      verified_status: true,
+      admin: true,
+    });
+
+    await userVerified.save();
+
+    const testUser = new User({
+      email: "testing2@abv.bg",
+      username: "testing",
+      first_name: "p",
+      last_name: "testing",
+      password: hashedPassword,
+      confirm_password: hashedPassword,
+      test_user: true,
+    });
+
+    await testUser.save();
   });
 }
 

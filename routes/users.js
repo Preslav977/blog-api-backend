@@ -212,7 +212,9 @@ router.put(
       });
 
       if (!errors.isEmpty()) {
-        res.json({ message: "User not successfully updated." });
+        res.json({
+          message: "User did not meet the constrains and it was not updated.",
+        });
       } else {
         const updateUser = await User.findByIdAndUpdate(req.params.id, user);
         res.json(updateUser);

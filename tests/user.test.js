@@ -248,4 +248,33 @@ describe("testing the user routes and controllers", (done) => {
     expect(response.status).toBe(200);
     expect(response.body.token).toMatch(response.body.token);
   });
+
+  test("normal use shouldn't login as an author or an admin", async () => {
+    const response = await request(app).post("/user/login_verified").send({
+      email: "testing1@abv.bg",
+      password: "12345678",
+    });
+
+    expect(response.body.message).toBe("Unauthorized");
+  });
+
+  test("verified users should login in and receive the token", async () => {
+    const response = await request(app).post("/user/login_verified").send({
+      email: "testing@abv.bg",
+      password: "12345678",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.token).toMatch(response.body.token);
+  });
+
+  test("test user should login in and receive the token", async () => {
+    const response = await request(app).post("/user/login_test_user").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.token).toMatch(response.body.token);
+  });
 });
