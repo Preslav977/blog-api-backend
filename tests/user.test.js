@@ -102,6 +102,7 @@ describe("testing the user routes and controllers", (done) => {
 
   test("testing if the user is successfully created", async () => {
     const creatingUser = {
+      // id: "666ab1666f79c72c01496e8c",
       email: "testing123@abv.bg",
       username: "testing",
       first_name: "p",
@@ -276,5 +277,19 @@ describe("testing the user routes and controllers", (done) => {
 
     expect(response.status).toBe(200);
     expect(response.body.token).toMatch(response.body.token);
+
+    console.log(response.body.token);
+  });
+
+  test("testing if user can fetch is information", async () => {
+    const TOKEN =
+      '["Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njg3YmIzZTBiZThmNWZiNDVmYjYxYTMiLCJpYXQiOjE3MjAxNzEzMjcsImV4cCI6MTcyMDE3MjIyN30.PqNn-mbzCJyiFMbaV091eYDTVSKf6yJMZy14dofvVU4"]';
+
+    const response = await request(app)
+      .get("/user/")
+      .send({ _id: "666ab1666f79c72c01496e8c" })
+      .set("Authorization", `${TOKEN}`);
+
+    console.log(response);
   });
 });

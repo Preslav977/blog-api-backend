@@ -28,6 +28,7 @@ async function initializeMongoServer() {
     }
 
     const user = new User({
+      // id: "666ab1666f79c72c01496e8c",
       email: "testing1@abv.bg",
       username: "testing",
       first_name: "p",
@@ -54,6 +55,7 @@ async function initializeMongoServer() {
     await userVerified.save();
 
     const testUser = new User({
+      _id: "666ab1666f79c72c01496e8c",
       email: "testing2@abv.bg",
       username: "testing",
       first_name: "p",

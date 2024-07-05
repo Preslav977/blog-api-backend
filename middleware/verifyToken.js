@@ -3,22 +3,14 @@ const jwt = require("jsonwebtoken");
 function verifyToken(req, res, next) {
   const bearerHeader = req.headers.authorization;
 
-  // console.log(bearerHeader);
-
   const bearerHeaderParse = JSON.parse(bearerHeader);
 
-  // console.log(bearerHeaderParse);
-
   const bearerHeaderJoin = bearerHeaderParse.join(" ");
-
-  // console.log(bearerHeaderJoin);
 
   if (typeof bearerHeader !== "undefined") {
     const bearer = bearerHeaderJoin.split(" ");
 
     // const bearer = bearerHeader.split(" ");
-
-    // console.log(bearer);
 
     const bearerToken = bearer[1];
 
