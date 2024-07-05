@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
-const asyncHandler = require("express-async-handler");
 const bcrypt = require("bcrypt");
 const User = require("./models/user");
 

@@ -277,19 +277,25 @@ describe("testing the user routes and controllers", (done) => {
 
     expect(response.status).toBe(200);
     expect(response.body.token).toMatch(response.body.token);
-
-    console.log(response.body.token);
   });
 
   test("testing if user can fetch is information", async () => {
-    const TOKEN =
-      '["Bearer", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2Njg3YmIzZTBiZThmNWZiNDVmYjYxYTMiLCJpYXQiOjE3MjAxNzEzMjcsImV4cCI6MTcyMDE3MjIyN30.PqNn-mbzCJyiFMbaV091eYDTVSKf6yJMZy14dofvVU4"]';
+    let response = await request(app).post("/user/login_test_user").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
 
-    const response = await request(app)
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
       .get("/user/")
       .send({ _id: "666ab1666f79c72c01496e8c" })
-      .set("Authorization", `${TOKEN}`);
+      .set("Authorization", `${RetrieveToken}`);
 
-    console.log(response);
+    console.log(response.text);
   });
 });
