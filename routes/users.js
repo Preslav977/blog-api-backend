@@ -216,8 +216,9 @@ router.put(
           message: "User did not meet the constrains and it was not updated.",
         });
       } else {
-        const updateUser = await User.findByIdAndUpdate(req.params.id, user);
-        res.json(updateUser);
+        await User.findByIdAndUpdate(req.params.id, user);
+        // console.log(updateUser);
+        res.json(user);
       }
     });
   }),

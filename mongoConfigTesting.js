@@ -27,7 +27,7 @@ async function initializeMongoServer() {
     }
 
     const user = new User({
-      // id: "666ab1666f79c72c01496e8c",
+      _id: "666ab1666f79c72c01496e8d",
       email: "testing1@abv.bg",
       username: "testing",
       first_name: "p",

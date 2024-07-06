@@ -296,6 +296,224 @@ describe("testing the user routes and controllers", (done) => {
       .send({ _id: "666ab1666f79c72c01496e8c" })
       .set("Authorization", `${RetrieveToken}`);
 
-    console.log(response.text);
+    expect(response.body.email).toBe("testing2@abv.bg");
+
+    expect(response.body.username).toBe("testing");
+
+    expect(response.body.first_name).toBe("p");
+
+    expect(response.body.last_name).toBe("testing");
+
+    expect(response.body.password).toBe(response.body.password);
+
+    expect(response.body.confirm_password).toBe(response.body.confirm_password);
+  });
+
+  test("testing if user can change his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing1@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8d")
+      .send({
+        email: "newemail@test.com",
+        username: "newusername",
+        first_name: "name",
+        last_name: "testing",
+        password: "1234567890",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.email).toBe("newemail@test.com");
+    expect(response.body.username).toBe("newusername");
+    expect(response.body.first_name).toBe("name");
+    expect(response.body.last_name).toBe("testing");
+    expect(response.body.password).toEqual(response.body.password);
+    expect(response.body.confirm_password).toEqual(
+      response.body.confirm_password,
+    );
+  });
+
+  test("testing if provided valid email before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemailtest123.com",
+        username: "newusername",
+        first_name: "name",
+        last_name: "testing",
+        password: "1234567890",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
+  });
+
+  test("testing if provided 5 characters username before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemail@test.com",
+        username: "awd",
+        first_name: "name",
+        last_name: "testing",
+        password: "1234567890",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
+  });
+
+  test("testing if provided 1 character first name before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemail@test.com",
+        username: "awdawd",
+        first_name: "",
+        last_name: "testing",
+        password: "1234567890",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
+  });
+
+  test("testing if provided 3 character last name before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemail@test.com",
+        username: "awdawd",
+        first_name: "awd",
+        last_name: "da",
+        password: "1234567890",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
+  });
+
+  test("testing if provided 8 characters password before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemail@test.com",
+        username: "awdawd",
+        first_name: "awd",
+        last_name: "daawd",
+        password: "1234567",
+        confirm_password: "1234567890",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
+  });
+
+  test("testing if provided passwords are matching before updating his information", async () => {
+    let response = await request(app).post("/user/login").send({
+      email: "testing2@abv.bg",
+      password: "12345678",
+    });
+
+    const getToken = response.body.token;
+
+    const token = ["Bearer", getToken];
+
+    const RetrieveToken = JSON.stringify(token);
+
+    response = await request(app)
+      .put("/user/666ab1666f79c72c01496e8c")
+      .send({
+        email: "newemail@test.com",
+        username: "awdawd",
+        first_name: "awd",
+        last_name: "daawd",
+        password: "123456789",
+        confirm_password: "12345678",
+      })
+      .set("Authorization", `${RetrieveToken}`);
+
+    expect(response.body.message).toBe(
+      "User did not meet the constrains and it was not updated.",
+    );
   });
 });
