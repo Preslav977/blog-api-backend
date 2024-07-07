@@ -57,8 +57,6 @@ describe("testing the post routes and controllers", (done) => {
     expect(response.header["content-type"]).toMatch(/json/);
     expect(response.status).toBe(200);
 
-    console.log(response.body);
-
     expect(response.body.id).toEqual(response.body.id);
 
     expect(response.body.title).toBe("my first post");
@@ -78,5 +76,34 @@ describe("testing the post routes and controllers", (done) => {
     expect(response.body.image_source).toBe("wowwwow");
 
     expect(response.body.comments).toEqual([]);
+  });
+
+  test("testing if post it is fetched by tag name", async () => {
+    const response = await request(app)
+      .get("/posts/tag/bla")
+      .set("Accept", "application/json");
+
+    expect(response.header["content-type"]).toMatch(/json/);
+    expect(response.status).toBe(200);
+
+    expect(response.body[0]._id).toEqual(response.body[0]._id);
+
+    expect(response.body[0].title).toBe("my first post");
+
+    expect(response.body[0].date).toBe("2024-06-06T21:00:00.000Z");
+
+    expect(response.body[0].tags[0]).toBe("bla");
+
+    expect(response.body[0].tags[1]).toBe("test");
+
+    expect(response.body[0].tags[2]).toBe("wow");
+
+    expect(response.body[0].image_link).toBe("somewhere else");
+
+    expect(response.body[0].image_owner).toBe("whawtat");
+
+    expect(response.body[0].image_source).toBe("wowwwow");
+
+    expect(response.body[0].comments).toEqual([]);
   });
 });
