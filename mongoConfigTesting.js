@@ -42,7 +42,7 @@ async function initializeMongoServer() {
     await user.save();
 
     const userVerified = new User({
-      id: "666ab1666f79c72c01496e8b",
+      _id: "666ab1666f79c72c01496e8b",
       email: "testing@abv.bg",
       username: "testing",
       first_name: "p",
