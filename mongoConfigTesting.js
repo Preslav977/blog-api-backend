@@ -70,7 +70,7 @@ async function initializeMongoServer() {
   });
 
   const firstPost = new Post({
-    id: "666a851f024b1c34ece39586",
+    _id: "666a851f024b1c34ece39586",
     title: "my first post",
     author: "666ab1666f79c72c01496e8b",
     date: "06-07-2024",
