@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const { MongoMemoryServer } = require("mongodb-memory-server");
 const bcrypt = require("bcrypt");
 const User = require("./models/user");
+const Post = require("./models/post");
 
 async function initializeMongoServer() {
   const mongoServer = await MongoMemoryServer.create();
@@ -41,6 +42,7 @@ async function initializeMongoServer() {
     await user.save();
 
     const userVerified = new User({
+      id: "666ab1666f79c72c01496e8b",
       email: "testing@abv.bg",
       username: "testing",
       first_name: "p",
@@ -66,6 +68,23 @@ async function initializeMongoServer() {
 
     await testUser.save();
   });
+
+  const firstPost = new Post({
+    id: "666a851f024b1c34ece39586",
+    title: "my first post",
+    author: "666ab1666f79c72c01496e8b",
+    date: "06-07-2024",
+    body: "random stuff",
+    category: [],
+    tags: ["bla", "test", "wow"],
+    image_link: "somewhere else",
+    image_owner: "whawtat",
+    image_source: "wowwwow",
+    privacy: false,
+    comments: [],
+  });
+
+  await firstPost.save();
 }
 
 module.exports = initializeMongoServer;
