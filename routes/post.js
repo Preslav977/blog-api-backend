@@ -145,7 +145,9 @@ router.post(
     });
 
     if (!errors.isEmpty()) {
-      res.json({ message: "Failed to create a post." });
+      res.json({
+        message: "Failed to create a post the constrains are not met.",
+      });
     } else {
       const postTitleExists = await Post.findOne({ title: req.body.title })
         .collation({ locale: "en", strength: 2 })
@@ -197,7 +199,6 @@ router.post(
         post.category.push(category);
         await category.save();
         await post.save();
-        console.log(post);
         res.json(post);
       }
     }
@@ -226,7 +227,9 @@ router.post(
     });
 
     if (!errors.isEmpty()) {
-      res.json({ message: "Failed to create a comment " });
+      res.json({
+        message: "Failed to create a comment the constrains are not met.",
+      });
     } else {
       post.comments.push(comment);
       await comment.save();
@@ -258,17 +261,17 @@ router.put(
     .isLength({ min: 5 })
     .isLength({ max: 80 })
     .escape(),
-  body("author", "Author must be between 5 and 80 characters long.").escape(),
+  body("author").escape(),
   body("body", "Body must be between 5 and 50000 characters long.")
     .trim()
     .isLength({ min: 5 })
     .isLength({ max: 50000 }),
   // .escape(),
-  body("category", "Category must be between 3 and 30 characters long.")
-    .trim()
-    .isLength({ min: 3 })
-    .isLength({ max: 30 })
-    .escape(),
+  // body("category", "Category must be between 3 and 30 characters long.")
+  //   .trim()
+  //   .isLength({ min: 3 })
+  //   .isLength({ max: 30 })
+  //   .escape(),
   body("tags", "Tags must be 3 and 30 characters and 30 characters long.")
     .trim()
     .isLength({ min: 3 })
@@ -318,7 +321,9 @@ router.put(
     });
 
     if (!errors.isEmpty()) {
-      res.json({ message: "Failed to update the post." });
+      res.json({
+        message: "Failed to update the post the constrains are not met.",
+      });
     } else {
       post.category.push(category);
       await Post.findByIdAndUpdate(req.params.id, post);
@@ -394,7 +399,8 @@ router.delete(
       res.redirect("/");
     } else {
       await Post.findByIdAndDelete(req.body.id);
-      res.json(post);
+      // res.json(post);
+      res.json({ message: "Post has been deleted." });
     }
   }),
 );

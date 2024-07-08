@@ -85,6 +85,25 @@ async function initializeMongoServer() {
   });
 
   await firstPost.save();
+
+    const secondPost = new Post({
+    _id: "666a851f024b1c34ece39582",
+    title: "my first post",
+    author: "666ab1666f79c72c01496e8b",
+    date: "06-07-2024",
+    body: "random stuff",
+    category: [{
+      category: "testing", _id: "668b829c383c372fc836463f"
+    }],
+    tags: ["bla", "test", "wow"],
+    image_link: "somewhere else",
+    image_owner: "whawtat",
+    image_source: "wowwwow",
+    privacy: false,
+    comments: [],
+  });
+
+  await secondPost.save();
 }
 
 module.exports = initializeMongoServer;
