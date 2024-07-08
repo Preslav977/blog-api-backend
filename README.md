@@ -1,4 +1,4 @@
-# blog-api-backend
+# readme-repository
 
 1. This is the result of the blog API backend.
 
@@ -22,7 +22,8 @@
 - [x] creating protected routes with passportJS and JWT tokens by checking two different routers One is for the normal users that can log in to the frontend, and the other login router is for the verified users and the admins.
 - Using the JWT token allows retrieving the payload from that token, depending on what is sent on the token. For this project, it is only the ID, verified_status, and admin fields.
 - With PassportJS, I can check if the user exists in the database or not and send an error.
-- The JWT is implemented using the Bearer schema, and if the token is successfully sent, it should get only the token, not the bearer. Since there are different implementations of this token for this project, I am using localStorage to save the token..
+- The JWT is implemented using the Bearer schema, and if the token is successfully sent, it should get only the token, not the bearer. Since there are different implementations of this token for this project, I am using localStorage to save the token.
+- [x] added backend tests to make sure every router and controller works.
 
 4. Notes and lessons learned
 
@@ -33,6 +34,7 @@
 - How to implement a JWT token with PassportJS by checking if the frontend is sending an authorization header, then using JSON parse to get the token and see if it is undefined or not, and then sending back the token to the frontend.
 - I learned how to implement PassportJS with an email and password since the default implementation is username and password.
 - Learned how to configure multer and cloudinary to upload an image and retrieve it from the cloudinary.
+- I learned how to make backend tests for every route for CRUD operations for user, post, comment, and category. Which allows us to test if each route and test work as intended and minimizes the chance for bugs later.
 
 5. Features or things I'd love to work on in the future
 
