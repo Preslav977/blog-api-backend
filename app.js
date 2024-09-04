@@ -36,8 +36,9 @@ app.use(
     origin: [
       "https://blog-api-frontend-lime.vercel.app",
       "https://blog-api-cms-ten.vercel.app",
+      "Access-Control-Allow-Origin: *",
     ],
-    credentials: true,
+    // credentials: true,
   }),
 );
 
