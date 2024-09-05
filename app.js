@@ -45,11 +45,11 @@ app.use(
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
 
-cloudinary.config({
-  cloud_name: process.env.cloud_name,
-  api_key: process.env.API_key,
-  api_secret: process.env.API_secret,
-});
+// cloudinary.config({
+//   cloud_name: process.env.cloud_name,
+//   api_key: process.env.API_key,
+//   api_secret: process.env.API_secret,
+// });
 
 app.use(
   session({

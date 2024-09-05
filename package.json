@@ -9,7 +9,7 @@
   },
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
+    "start": "node app.js",
     "devstart": "nodemon ./bin/www",
     "serverstart": "DEBUG=express: blog-api-backend* npm run devstart",
     "test": "jest"
@@ -29,6 +29,7 @@
     "express-validator": "^7.0.1",
     "helmet": "^7.1.0",
     "http-errors": "~1.6.3",
+    "i": "^0.3.7",
     "jsonwebtoken": "^9.0.2",
     "localStorage": "^1.0.4",
     "luxon": "^3.4.4",
