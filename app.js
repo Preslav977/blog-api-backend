@@ -20,6 +20,8 @@ const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
 const User = require("./models/user");
 
+const port = process.env.PORT || 3000;
+
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
@@ -148,6 +150,10 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
   console.log(err);
   res.render("error");
+});
+
+app.listen(port, () => {
+  console.log(`App is listening at port ${port}`);
 });
 
 module.exports = app;
