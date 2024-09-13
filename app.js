@@ -20,7 +20,7 @@ const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
 const User = require("./models/user");
 
-const port = process.env.PORT || 3000;
+// const port = process.env.PORT || 3000;
 
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000,
@@ -36,10 +36,10 @@ app.use(limiter);
 app.use(
   cors({
     origin: [
-      "https://blog-api-frontend-lime.vercel.app",
+      "https://quixotic-chivalrous-quit.glitch.me/",
+      "https://blog-api-frontend-lime.vercel.app/",
       "https://blog-api-cms-ten.vercel.app",
     ],
-    credentials: true,
   }),
 );
 
@@ -129,7 +129,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
-app.use(compression());
+// app.use(compression());
 
 app.use("/", postsRouter);
 app.use("/user", usersRouter);
@@ -152,8 +152,8 @@ app.use((err, req, res, next) => {
   res.render("error");
 });
 
-app.listen(port, () => {
-  console.log(`App is listening at port ${port}`);
-});
+// app.listen(port, () => {
+//   console.log(`App is listening at port ${port}`);
+// });
 
 module.exports = app;

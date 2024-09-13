@@ -3,7 +3,6 @@ const { MongoMemoryServer } = require("mongodb-memory-server");
 const bcrypt = require("bcrypt");
 const User = require("./models/user");
 const Post = require("./models/post");
-require("dotenv").config();
 
 async function initializeMongoServer() {
   const mongoServer = await MongoMemoryServer.create();
