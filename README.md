@@ -8,6 +8,13 @@ This is the API or server side of the project that is communicating with the fro
 
 The Blog API project is around bulgarian culture, and it focuses on restful routes. The user can fetch posts depending on the router he or she is on. Some routes are protected with Passport JS and JWT, and it requires the user to log in. There is also a guest account, which bypasses the need to create an account.
 
+# Live Previews
+
+- [View the live site here](https://blog-api-frontend-lime.vercel.app/)
+- [View the live CMS site here](https://blog-api-cms-ten.vercel.app/)
+- [View the front-end repository here](https://github.com/Preslav977/blog-api-frontend)
+- [View the front-end CMS repository here](https://github.com/Preslav977/blog-api-frontend)
+
 # Features
 
 - Filter posts by ID
