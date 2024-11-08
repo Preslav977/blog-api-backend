@@ -13,7 +13,7 @@ The Blog API project is around bulgarian culture, and it focuses on restful rout
 - [View the live site here](https://blog-api-frontend-lime.vercel.app/)
 - [View the live CMS site here](https://blog-api-cms-ten.vercel.app/)
 - [View the front-end repository here](https://github.com/Preslav977/blog-api-frontend)
-- [View the front-end CMS repository here](https://github.com/Preslav977/blog-api-frontend)
+- [View the front-end CMS repository here](https://github.com/Preslav977/blog-api-cms)
 
 # Features
 
