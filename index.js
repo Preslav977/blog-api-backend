@@ -9,12 +9,10 @@ const LocalStrategy = require("passport-local").Strategy;
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const cors = require("cors");
-const cloudinary = require("cloudinary").v2;
 
-const compression = require("compression");
 const helmet = require("helmet");
 const RateLimit = require("express-rate-limit");
-const mongoose = require("./mongoConfig");
+
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
@@ -33,17 +31,15 @@ app.use(helmet());
 
 app.use(limiter);
 
-app.use(cors());
-
-// app.use(
-//   cors({
-//     origin: [
-//       "https://quixotic-chivalrous-quit.glitch.me/",
-//       "https://blog-api-frontend-lime.vercel.app/",
-//       "https://blog-api-cms-ten.vercel.app",
-//     ],
-//   }),
-// );
+app.use(
+  cors({
+    origin: [
+      "https://blog-api-backend-tan.vercel.app/",
+      "https://blog-api-frontend-lime.vercel.app/",
+      "https://blog-api-cms-ten.vercel.app",
+    ],
+  }),
+);
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
