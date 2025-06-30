@@ -20,7 +20,7 @@ const postsRouter = require("./routes/post");
 const categoryRouter = require("./routes/category");
 const User = require("./models/user");
 
-// const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 const limiter = RateLimit({
   windowMs: 15 * 60 * 1000,
@@ -33,15 +33,17 @@ app.use(helmet());
 
 app.use(limiter);
 
-app.use(
-  cors({
-    origin: [
-      "https://quixotic-chivalrous-quit.glitch.me/",
-      "https://blog-api-frontend-lime.vercel.app/",
-      "https://blog-api-cms-ten.vercel.app",
-    ],
-  }),
-);
+app.use(cors());
+
+// app.use(
+//   cors({
+//     origin: [
+//       "https://quixotic-chivalrous-quit.glitch.me/",
+//       "https://blog-api-frontend-lime.vercel.app/",
+//       "https://blog-api-cms-ten.vercel.app",
+//     ],
+//   }),
+// );
 
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
