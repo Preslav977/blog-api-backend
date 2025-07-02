@@ -1,7 +1,11 @@
 const mongoose = require("mongoose");
+
 const { MongoMemoryServer } = require("mongodb-memory-server");
+
 const bcrypt = require("bcrypt");
+
 const User = require("./models/user");
+
 const Post = require("./models/post");
 
 async function initializeMongoServer() {

@@ -1,21 +1,35 @@
 require("dotenv").config();
+
 const createError = require("http-errors");
+
 const express = require("express");
+
 const path = require("path");
+
 const cookieParser = require("cookie-parser");
+
 const logger = require("morgan");
+
 const session = require("express-session");
+
 const LocalStrategy = require("passport-local").Strategy;
+
 const bcrypt = require("bcrypt");
+
 const passport = require("passport");
+
 const cors = require("cors");
 
 const helmet = require("helmet");
+
 const RateLimit = require("express-rate-limit");
 
 const usersRouter = require("./routes/users");
+
 const postsRouter = require("./routes/post");
+
 const categoryRouter = require("./routes/category");
+
 const User = require("./models/user");
 
 const port = process.env.PORT || 3000;

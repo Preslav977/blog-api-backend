@@ -1,14 +1,17 @@
 const express = require("express");
-const multer = require("multer");
-const cloudinary = require("cloudinary").v2;
-const fs = require("node:fs");
 
 const router = express.Router();
+
 const asyncHandler = require("express-async-handler");
+
 const { body, validationResult } = require("express-validator");
+
 const verifyToken = require("../middleware/verifyToken");
+
 const Post = require("../models/post");
+
 const Category = require("../models/category");
+
 const Comment = require("../models/comments");
 
 // const upload = multer({ dest: "./public/data/uploads" });
