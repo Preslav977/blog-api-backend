@@ -4,6 +4,8 @@
  * Module dependencies.
  */
 
+require("dotenv").config();
+
 const app = require("../index");
 const debug = require("debug")("express-template-repository:server");
 const http = require("http");

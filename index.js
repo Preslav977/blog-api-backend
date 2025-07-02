@@ -24,6 +24,8 @@ const helmet = require("helmet");
 
 const RateLimit = require("express-rate-limit");
 
+const mongoose = require("./mongoConfig");
+
 const usersRouter = require("./routes/users");
 
 const postsRouter = require("./routes/post");
@@ -45,11 +47,13 @@ app.use(helmet());
 
 app.use(limiter);
 
+// app.use(cors());
+
 app.use(
   cors({
     origin: [
-      "https://blog-api-backend-tan.vercel.app/",
-      "https://blog-api-frontend-lime.vercel.app/",
+      "https://blog-api-backend-tan.vercel.app",
+      "https://blog-api-frontend-lime.vercel.app",
       "https://blog-api-cms-ten.vercel.app",
     ],
   }),
